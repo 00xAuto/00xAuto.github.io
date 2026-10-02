@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────
+#  00xAuto — Jekyll Configuration
+# ─────────────────────────────────────────────
+
+title:       "00xAuto"
+description: "Exploit development, Windows kernel research, and vulnerability research."
+url:         "https://00xauto.github.io"
+baseurl:     ""
+
+author:
+  name:  "00xAuto"
+  email: "00xauto@gmail.com"
+
+# ── Build ──────────────────────────────────────
+theme:        null           # no theme — we use our own layouts
+markdown:     kramdown
+highlighter:  rouge
+
+kramdown:
+  input:          GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# ── Permalinks ─────────────────────────────────
+# Posts will live at /posts/your-post-title/
+permalink: /posts/:title/
+
+# ── Collections / Defaults ─────────────────────
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+# ── Plugins ────────────────────────────────────
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# ── Exclude from build ─────────────────────────
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
