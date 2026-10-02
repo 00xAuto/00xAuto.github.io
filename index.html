@@ -1,71 +1,526 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>00xAuto — Offensive Security</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"><style>:root {--bg:     #f0e9e0;--bg2:    #e8dfd4;--ink:    #18100a;--ink2:   #3a2e22;--muted:  #9a8878;--rule:   #cfc5b8;--accent: #d94f38;--green:  #4ab44a;--ruby:   #e0435f;--serif:  'DM Serif Display', Georgia, serif;--mono:   'Space Mono', 'Courier New', monospace;--sans:   'DM Sans', system-ui, sans-serif;}*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }html { scroll-behavior: smooth; }body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.7; overflow-x: hidden; cursor: crosshair; }a { color: inherit; text-decoration: none; cursor: crosshair; }button { cursor: crosshair; }
-nav {position: fixed; top: 0; left: 0; right: 0; z-index: 100;display: flex; align-items: center; justify-content: space-between;padding: 18px 48px;background: rgba(240,233,224,0.94); backdrop-filter: blur(14px);border-bottom: 1px solid var(--rule);}.nav-logo { font-family: var(--serif); font-size: 17px; }.nav-links { display: flex; gap: 28px; list-style: none; }.nav-links a {font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;text-transform: uppercase; color: var(--muted); transition: color 0.2s;}.nav-links a:hover { color: var(--ink); }.nav-avail {font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;color: var(--accent); display: flex; align-items: center; gap: 6px;}.nav-avail::before {content: ''; width: 6px; height: 6px; border-radius: 50%;background: var(--accent); animation: pulse 2s ease infinite;}@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-#hero {padding: 100px 48px 0;border-bottom: 2px solid var(--ink);}.hero-inner {display: grid;grid-template-columns: 1fr auto;gap: 0;align-items: end;}.hero-tag {display: inline-flex; align-items: center; gap: 8px;font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;text-transform: uppercase; color: var(--muted);border: 1px solid var(--rule); padding: 4px 12px;margin-bottom: 20px;}.hero-tag::before {content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent);}.hero-name {font-family: var(--serif);font-size: clamp(52px, 8vw, 100px);line-height: 0.88;letter-spacing: -2px;color: var(--ink);}.hero-name em { font-style: italic; color: var(--accent); }.cursor {display: inline-block; width: 3px; height: 0.75em;background: var(--accent); vertical-align: middle; margin-left: 4px;animation: blink 1s step-end infinite;}@keyframes blink { 50% { opacity: 0; } }.hero-sub {margin-top: 20px;font-size: 14px; font-weight: 300; color: var(--ink2);max-width: 480px; line-height: 1.75;}.hero-strip {display: flex; gap: 0;margin-top: 32px;border-top: 1px solid var(--rule);}.hstat { flex: 1; padding: 18px 0 20px; border-right: 1px solid var(--rule); }.hstat:last-child { border-right: none; padding-left: 24px; }.hstat:first-child { padding-right: 24px; }.hstat + .hstat:not(:last-child) { padding: 18px 24px 20px; }.hs-n { font-family: var(--serif); font-size: 36px; line-height: 1; color: var(--ink); }.hs-n em { font-style: italic; color: var(--accent); font-size: 22px; }.hs-l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }.hero-right {padding-left: 48px; padding-bottom: 20px;display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end;border-left: 1px solid var(--rule); margin-left: 48px;}.rank-badge { text-align: right; }.rb-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }.rb-rank { font-family: var(--serif); font-size: 56px; line-height: 0.9; color: var(--ink); letter-spacing: -2px; }.rb-rank em { font-style: italic; color: var(--accent); }.rb-sub { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; margin-top: 6px; }.hero-cta { display: flex; gap: 12px; align-items: center; margin-top: 24px; }.btn-primary {font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;padding: 10px 24px; background: var(--ink); color: var(--bg); transition: background 0.2s;}.btn-primary:hover { background: var(--accent); }.btn-ghost { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); transition: color 0.2s; }.btn-ghost:hover { color: var(--ink); }
-section { padding: 80px 48px; border-bottom: 1px solid var(--rule); }.sec-head {display: flex; align-items: baseline; justify-content: space-between;margin-bottom: 48px; padding-bottom: 14px; border-bottom: 2px solid var(--ink);}.sec-title { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 44px); letter-spacing: -1px; }.sec-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
-.proj-row {display: grid; grid-template-columns: 200px 1fr auto;gap: 28px; align-items: start;padding: 22px 0; border-bottom: 1px solid var(--rule);transition: background 0.15s;}.proj-row:last-child { border-bottom: none; }.proj-row:hover { background: rgba(217,79,56,0.03); }.proj-row:hover .proj-name { color: var(--accent); }.proj-name { font-family: var(--serif); font-size: 19px; transition: color 0.2s; padding-top: 2px; line-height: 1.2; }.proj-desc { font-size: 13px; font-weight: 300; color: var(--ink2); line-height: 1.7; margin-bottom: 10px; }.proj-tech { display: flex; gap: 5px; flex-wrap: wrap; }.ptag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--rule); color: var(--muted); }.ptag.hi { border-color: rgba(217,79,56,0.3); color: var(--accent); background: rgba(217,79,56,0.05); }.ptag.c { border-color: rgba(100,140,220,0.3); color: #6488dc; background: rgba(100,140,220,0.05); }.proj-link { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--accent); opacity: 0.4; transition: opacity 0.2s; white-space: nowrap; margin-top: 4px; }.proj-row:hover .proj-link { opacity: 1; }
-#htb { background: #0d0c09; color: #f2ede8; position: relative; overflow: hidden; }#htb .sec-title { color: #f2ede8; }#htb .sec-head { border-bottom-color: rgba(242,237,232,0.07); }#htb .sec-label { color: rgba(242,237,232,0.2); }
-#htb::before {content: '';position: absolute; inset: 0;background-image:linear-gradient(rgba(74,180,74,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(74,180,74,0.03) 1px, transparent 1px);background-size: 48px 48px;pointer-events: none;animation: gridDrift 20s linear infinite;}@keyframes gridDrift {from { background-position: 0 0; }to   { background-position: 48px 48px; }}.htb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: relative; z-index: 1; }.hcard {background: rgba(255,255,255,0.03);border: 1px solid rgba(255,255,255,0.06);padding: 22px 26px;position: relative;overflow: hidden;transition: border-color 0.3s;}.hcard:hover { border-color: rgba(74,180,74,0.2); }
-.hcard::after {content: '';position: absolute; left: 0; right: 0;height: 2px;background: linear-gradient(90deg, transparent, rgba(74,180,74,0.4), transparent);top: -2px;transition: top 0s;opacity: 0;}.hcard:hover::after {opacity: 1;animation: scanDown 0.6s ease forwards;}@keyframes scanDown {from { top: 0; opacity: 1; }to   { top: 100%; opacity: 0; }}.hcard-label {font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;color: rgba(242,237,232,0.22); margin-bottom: 14px;}
-.rank-row { display: flex; align-items: center; justify-content: space-between; }.rank-left { display: flex; align-items: center; gap: 14px; }
-.rank-emblem {width: 56px; height: 56px;position: relative; flex-shrink: 0;}.rank-emblem svg { width: 100%; height: 100%; }.emblem-hex {animation: emblemPulse 3s ease-in-out infinite;transform-origin: center;}@keyframes emblemPulse {0%,100% { filter: drop-shadow(0 0 4px rgba(180,140,255,0.4)); }50%      { filter: drop-shadow(0 0 12px rgba(180,140,255,0.9)); }}.emblem-ring {animation: emblemSpin 12s linear infinite;transform-origin: 28px 28px;}.rname { font-family: var(--serif); font-size: 26px; color: #f2ede8; line-height: 1; margin-bottom: 3px; }.rsub  { font-family: var(--mono); font-size: 9px; color: rgba(242,237,232,0.25); letter-spacing: 0.1em; }.rank-right { text-align: right; }.rank-num   { font-family: var(--serif); font-size: 38px; color: #f5a623; line-height: 1; }.rank-num.ruby { color: var(--ruby); }.rank-tier  { font-family: var(--mono); font-size: 9px; color: rgba(242,237,232,0.22); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 3px; }.season-toggle { display: flex; gap: 5px; }.sbtn {font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 3px 9px;border: 1px solid rgba(255,255,255,0.08); background: transparent;color: rgba(242,237,232,0.28); transition: all 0.2s;}.sbtn.on { border-color: rgba(74,180,74,0.5); background: rgba(74,180,74,0.08); color: var(--green); }.xp-wrap { margin-top: 16px; }.xp-head { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: rgba(242,237,232,0.22); margin-bottom: 6px; }.xp-track { height: 3px; background: rgba(255,255,255,0.05); overflow: hidden; }.xp-fill  { height: 100%; background: linear-gradient(90deg, var(--green), #8aee8a); transition: width 1.2s cubic-bezier(.4,0,.2,1); }
-@keyframes xpGrow { from { width: 0; } }.xp-fill { animation: xpGrow 1.4s cubic-bezier(.4,0,.2,1) forwards; }.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }.sc {background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.05);padding: 16px 18px; transition: background 0.2s;}.sc:hover { background: rgba(74,180,74,0.05); }.sc-n  { font-family: var(--serif); font-size: 28px; color: #f2ede8; line-height: 1; margin-bottom: 4px; }.sc-n.g { color: var(--green); }.sc-of { font-family: var(--mono); font-size: 11px; color: rgba(242,237,232,0.2); }.sc-l  { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(242,237,232,0.22); }.mini-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }.mc { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.05); padding: 16px 16px; }.mc-n { font-family: var(--serif); font-size: 26px; color: #f2ede8; line-height: 1; margin-bottom: 4px; }.mc-n.amber { color: #f5a623; }.mc-l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(242,237,232,0.22); }
-.donut-wrap { display: flex; align-items: center; gap: 24px; margin-top: 6px; }.legend { display: flex; flex-direction: column; gap: 9px; }.leg-row { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10px; color: rgba(242,237,232,0.4); }.leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }.donut-ring {stroke-dashoffset: 314;animation: donutDraw 1.6s cubic-bezier(.4,0,.2,1) forwards;}.donut-ring:nth-child(2) { animation-delay: 0.1s; }.donut-ring:nth-child(3) { animation-delay: 0.3s; }.donut-ring:nth-child(4) { animation-delay: 0.5s; }.donut-ring:nth-child(5) { animation-delay: 0.7s; }@keyframes donutDraw {from { stroke-dashoffset: 314; opacity: 0; }10%  { opacity: 1; }to   { stroke-dashoffset: 0; opacity: 1; }}
-.mach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.mach {background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);padding: 14px 16px; position: relative; transition: all 0.2s;}.mach:hover { border-color: rgba(74,180,74,0.25); background: rgba(74,180,74,0.04); }.mach-diff { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }.d-insane { color: #d94f38; }.d-hard   { color: #e8844a; }.mach-name { font-family: var(--serif); font-size: 17px; color: #f2ede8; margin-bottom: 2px; }.mach-os   { font-family: var(--mono); font-size: 9px; color: rgba(242,237,232,0.2); margin-bottom: 6px; }.mach-note { font-family: var(--mono); font-size: 9px; color: rgba(242,237,232,0.28); font-style: italic; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 7px; }.mach-owned { position: absolute; top: 12px; right: 12px; font-family: var(--mono); font-size: 9px; color: var(--green); }.mach-owned::before {content: '';display: inline-block; width: 5px; height: 5px; border-radius: 50%;background: var(--green); margin-right: 4px; vertical-align: middle;animation: pulse 2s ease infinite;}
-#skills { background: var(--bg2); }.skills-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }.sk-cell { background: var(--bg2); padding: 22px 26px; }.sk-name { font-family: var(--serif); font-size: 15px; margin-bottom: 10px; }.sk-tags { display: flex; flex-wrap: wrap; gap: 5px; }.sktag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--rule); color: var(--muted); }.sktag.hi { border-color: rgba(217,79,56,0.3); color: var(--accent); }
-.certs-block { margin-top: 40px; }.certs-label {font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;color: var(--muted); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--rule);}.certs-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }.cert-pill {display: flex; align-items: center; gap: 7px;font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;padding: 5px 12px; border: 1px solid var(--rule); color: var(--ink2);background: var(--bg); transition: border-color 0.2s, color 0.2s;}.cert-pill:hover { border-color: var(--accent); color: var(--accent); }.cert-pill.strong { border-color: rgba(217,79,56,0.25); color: var(--accent); background: rgba(217,79,56,0.04); }.cert-pill.top { border-color: rgba(217,79,56,0.55); color: #fff; background: var(--accent); }.cert-pill .ci { font-size: 8px; color: var(--muted); }.cert-pill.top .ci { color: rgba(255,255,255,0.75); }
-.data-row {display: flex; flex-wrap: wrap; gap: 8px; align-items: center;padding-top: 14px; border-top: 1px solid var(--rule);}.data-label {font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;color: var(--muted); margin-right: 4px; flex-shrink: 0;}.dtag {font-family: var(--mono); font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase;padding: 3px 10px; border: 1px solid var(--rule); color: var(--muted);}
-#contact { background: var(--ink); text-align: center; padding: 80px 48px; }.contact-inner { max-width: 500px; margin: 0 auto; }.contact-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(242,237,232,0.22); margin-bottom: 18px; }.contact-heading { font-family: var(--serif); font-size: clamp(36px, 5vw, 58px); color: var(--bg); letter-spacing: -1px; line-height: 1; margin-bottom: 16px; }.contact-heading em { font-style: italic; color: var(--accent); }.contact-sub { font-size: 13px; font-weight: 300; color: rgba(242,237,232,0.32); margin-bottom: 40px; line-height: 1.8; }.contact-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }.contact-link {display: flex; align-items: center; gap: 7px; padding: 10px 22px;border: 1px solid rgba(242,237,232,0.08); font-family: var(--mono);font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;color: rgba(242,237,232,0.35); transition: all 0.2s;}.contact-link:hover { border-color: var(--accent); color: var(--accent); }footer {padding: 18px 48px; border-top: 1px solid rgba(242,237,232,0.05); background: var(--ink);display: flex; justify-content: space-between;font-family: var(--mono); font-size: 9px; color: rgba(242,237,232,0.14); letter-spacing: 0.08em;}
-::-webkit-scrollbar { width: 3px; }::-webkit-scrollbar-track { background: var(--bg); }::-webkit-scrollbar-thumb { background: var(--rule); }::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-@media (max-width: 860px) {nav { padding: 16px 20px; }.nav-links { display: none; }#hero { padding: 80px 20px 0; }section { padding: 56px 20px; }#contact { padding: 56px 20px; }.hero-inner { grid-template-columns: 1fr; }.hero-right { display: none; }.hero-strip { flex-wrap: wrap; }.hstat { min-width: 40%; }.htb-grid { grid-template-columns: 1fr; }.stats-row { grid-template-columns: repeat(2,1fr); }.mini-row { grid-template-columns: repeat(2,1fr); }.skills-grid { grid-template-columns: 1fr 1fr; }.proj-row { grid-template-columns: 1fr; gap: 8px; }.proj-link { opacity: 1; }footer { padding: 18px 20px; flex-direction: column; gap: 5px; }}</style></head><body>
-<nav><div class="nav-logo">00xAuto | OSCP certified</div><ul class="nav-links"><li><a href="#projects">Projects</a></li><li><a href="#htb">HTB</a></li><li><a href="#skills">Skills</a></li><li><a href="#contact">Contact</a></li></ul><div class="nav-avail">Available for work</div></nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>00xAuto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0e0e0e;
+    --bg2:     #141414;
+    --bg3:     #1a1a1a;
+    --border:  #242424;
+    --border2: #2e2e2e;
+    --text:    #c8c8c8;
+    --text2:   #888;
+    --bright:  #f0f0f0;
+    --accent:  #7cfc6e;
+    --accent2: #4db8ff;
+    --red:     #ff5f57;
+    --orange:  #e8844a;
+    --yellow:  #f5c842;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+    --serif:   'IBM Plex Serif', serif;
+  }
 
-<section id="hero"><div class="hero-inner"><div class="hero-left"><div class="hero-tag">Red Team · Penetration Testing · 18 y/o · <b>OSCP</b></div><h1 class="hero-name">00x<em>Auto<span class="cursor"></span></em></h1><p class="hero-sub">Offensive security practitioner and red team operator. Grandmaster on HTB, 217 machines owned. OSCP+ certified. Focused on red teaming, exploit development, low-level reversing, tooling, and Active Directory.</p><div class="hero-cta"><a href="#contact" class="btn-primary">Get in touch →</a><a href="#projects" class="btn-ghost">View projects ↓</a></div></div><div class="hero-right"><div class="rank-badge"><div class="rb-title">HTB Rank</div><div class="rb-rank">Grand<em>master</em></div><div class="rb-sub">Lvl 95 · S11 Ruby #83</div></div></div></div><div class="hero-strip"><div class="hstat"><div class="hs-n">217<em>+</em></div><div class="hs-l">HTB Machines</div></div><div class="hstat"><div class="hs-n">7</div><div class="hs-l">Public Tools</div></div><div class="hstat"><div class="hs-n">Top 200</div><div class="hs-l">HTB</div></div><div class="hstat"><div class="hs-n">5<em>/6</em></div><div class="hs-l">Fortresses</div></div></div></section>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.7; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
 
-<section id="projects"><div class="sec-head"><h2 class="sec-title">Projects</h2><span class="sec-label">Public Tools</span></div><div class="proj-row"><div class="proj-name">Nemesis AV-Bypass Shell</div><div class="proj-body"><div class="proj-desc">Windows reverse shell in C with XOR-obfuscated C2 config. IP is never stored in plaintext — encrypted at build time, decrypted into a stack buffer at runtime then immediately zeroed before <code>connect()</code>. No console window, stripped symbols, Winsock only.</div><div class="proj-tech"><span class="ptag hi">AV Evasion</span><span class="ptag c">C</span><span class="ptag">Winsock</span><span class="ptag">Obfuscation</span></div></div><a href="https://github.com/00xAuto/Nemesis-AV-bypass-shell" target="_blank" class="proj-link">GitHub →</a></div><div class="proj-row"><div class="proj-name">UUIDFuscation Loader</div><div class="proj-body"><div class="proj-desc">Shellcode loader using UUID string obfuscation to evade static AV signatures. Shellcode is encoded as UUID strings, decoded at runtime with <code>UuidFromStringA</code>, then executed in a heap-allocated RX region. Minimal imports, no suspicious API sequences.</div><div class="proj-tech"><span class="ptag hi">AV Evasion</span><span class="ptag c">C</span><span class="ptag">Shellcode</span><span class="ptag">UUID</span><span class="ptag">Loader</span></div></div><a href="https://github.com/00xAuto/UUIDFuscation-Loader" target="_blank" class="proj-link">GitHub →</a></div><div class="proj-row"><div class="proj-name">Special ODT Macro RCE</div><div class="proj-body"><div class="proj-desc">Generates malicious <code>.odt</code> files that fire a payload on open in LibreOffice. Dual-mode: reverse shell via <code>dom:load</code> macro event, or NTLM hash capture via embedded UNC path. Uses the exact Metasploit skeleton — zero external dependencies.</div><div class="proj-tech"><span class="ptag hi">RCE</span><span class="ptag hi">Python</span><span class="ptag">LibreOffice</span><span class="ptag">NTLM</span><span class="ptag">HTB Job</span></div></div><a href="https://github.com/00xAuto/Special-ODT-Macro-RCE" target="_blank" class="proj-link">GitHub →</a></div><div class="proj-row"><div class="proj-name">Minion HTB Auto-Pwn</div><div class="proj-body"><div class="proj-desc">Full automated exploit chain for HTB: Minion (Insane/Windows). Firewall drops all TCP/UDP outbound — data exfil over ICMP only. Implements an interactive admin shell via PowerShell <code>Ping.Send()</code> and Scapy sniffing. Covers scheduled task hijack, NTFS ADS extraction, and PSCredential pivot.</div><div class="proj-tech"><span class="ptag hi">Insane</span><span class="ptag hi">Python</span><span class="ptag">ICMP Shell</span><span class="ptag">Windows</span><span class="ptag">Scapy</span></div></div><a href="https://github.com/00xAuto/Minion-HTB-Pwner-Script" target="_blank" class="proj-link">GitHub →</a></div><div class="proj-row"><div class="proj-name">IMAP Mailbox Dumper</div><div class="proj-body"><div class="proj-desc">Dumps every IMAP folder — headers and full body — to stdout. Useful post-credential-spray on internal mail servers. Demonstrated against PG Practice: Postfish. SSL, graceful per-folder error handling, binary attachment safe.</div><div class="proj-tech"><span class="ptag hi">IMAP</span><span class="ptag hi">Python</span><span class="ptag">Post-Exploitation</span><span class="ptag">Cred Reuse</span></div></div><a href="https://github.com/00xAuto/IMAP-Mailbox-Dumper" target="_blank" class="proj-link">GitHub →</a></div><div class="proj-row"><div class="proj-name">Windows SID Parser</div><div class="proj-body"><div class="proj-desc">Parses raw Windows Security Identifier bytes into human-readable SID strings. Useful during AD enumeration, LDAP/LDIF analysis, and memory forensics. Decodes revision, identifier authority, and all sub-authorities.</div><div class="proj-tech"><span class="ptag hi">Active Directory</span><span class="ptag hi">Python</span><span class="ptag">SID Enum</span><span class="ptag">Forensics</span></div></div><a href="https://github.com/00xAuto/Microsoft-SQL-SID-bruteforce" target="_blank" class="proj-link">GitHub →</a></div></section>
+  .cursor {
+    display: inline-block; width: 8px; height: 14px;
+    background: var(--accent); vertical-align: text-bottom;
+    animation: blink 1s step-end infinite; margin-left: 1px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
 
-<section id="htb"><div class="sec-head" style="position:relative;z-index:1;"><h2 class="sec-title">HackTheBox</h2><span class="sec-label">Stats</span></div><div class="htb-grid">
-<div style="display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;"><div class="hcard"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="hcard-label" style="margin:0;">Rank &amp; Level</div><div class="season-toggle"><button class="sbtn" id="btn-s10" onclick="setSeason(10)">S10</button><button class="sbtn on" id="btn-s11" onclick="setSeason(11)">S11</button></div></div><div class="rank-row"><div class="rank-left"><div class="rank-emblem"><svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><g class="emblem-ring"><polygon points="28,2 50,15 50,41 28,54 6,41 6,15"fill="none" stroke="rgba(180,140,255,0.18)" stroke-width="1"/><polygon points="28,5 47,16.5 47,39.5 28,51 9,39.5 9,16.5"fill="none" stroke="rgba(180,140,255,0.1)" stroke-width="0.5"/></g><g class="emblem-hex"><polygon points="28,10 43,19 43,37 28,46 13,37 13,19"fill="rgba(120,80,200,0.15)" stroke="rgba(180,140,255,0.5)" stroke-width="1.2"/><polygon points="28,16 35,22 28,28 21,22" fill="rgba(200,160,255,0.7)"/><polygon points="28,28 35,34 28,40 21,34" fill="rgba(200,160,255,0.4)"/><line x1="21" y1="22" x2="35" y2="22" stroke="rgba(220,190,255,0.6)" stroke-width="0.8"/><line x1="21" y1="34" x2="35" y2="34" stroke="rgba(220,190,255,0.4)" stroke-width="0.8"/><path d="M21,14 Q28,9 35,14" fill="none" stroke="rgba(240,220,255,0.7)" stroke-width="1.2" stroke-linecap="round"/></g><text x="28" y="54" text-anchor="middle" font-family="Space Mono,monospace" font-size="5" fill="rgba(74,180,74,0.7)" letter-spacing="0.5">LVL 95</text></svg></div><div><div class="rname">Grandmaster</div><div class="rsub">HTB Rank</div></div></div><div class="rank-right"><div class="rank-num ruby" id="season-rank">#83</div><div class="rank-tier" id="season-tier">Ruby Tier · S11</div></div></div><div class="xp-wrap"><div class="xp-head"><span>Level XP</span><span>2954 / 5091</span></div><div class="xp-track"><div class="xp-fill" style="width:58%"></div></div></div></div><div class="stats-row"><div class="sc"><div class="sc-n">217<span class="sc-of">/544</span></div><div class="sc-l">Machines</div></div><div class="sc"><div class="sc-n g" id="season-points">460</div><div class="sc-l">Points</div></div><div class="sc"><div class="sc-n" id="season-flags">16<span class="sc-of">/26</span></div><div class="sc-l">Flags</div></div></div><div class="mini-row"><div class="mc"><div class="mc-n amber">5<span style="font-family:var(--mono);font-size:12px;color:rgba(242,237,232,0.2)">/6</span></div><div class="mc-l">Fortresses 🏰</div></div><div class="mc"><div class="mc-n">75<span style="font-family:var(--mono);font-size:12px;color:rgba(242,237,232,0.2)">/838</span></div><div class="mc-l">Challenges</div></div><div class="mc"><div class="mc-n">CPTS path<span style="font-family:var(--mono);font-size:12px;color:rgba(242,237,232,0.2)"></span></div><div class="mc-l">Academy</div></div><div class="mc"><div class="mc-n">Mythical<span style="font-family:var(--mono);font-size:12px;color:rgba(242,237,232,0.2)"></span></div><div class="mc-l">Pro Labs / Mini</div></div></div></div>
-<div style="display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;"><div class="hcard"><div class="hcard-label">Difficulty Breakdown</div><div class="donut-wrap"><svg id="donut-svg" width="120" height="120" viewBox="0 0 130 130"><circle cx="65" cy="65" r="50" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="18"/><circle class="donut-ring" cx="65" cy="65" r="50" fill="none" stroke="#4ab44a" stroke-width="18"stroke-dasharray="141 173" stroke-dashoffset="78" style="stroke-dashoffset:78"/><circle class="donut-ring" cx="65" cy="65" r="50" fill="none" stroke="#f5c842" stroke-width="18"stroke-dasharray="94 220" stroke-dashoffset="-63" style="stroke-dashoffset:-63"/><circle class="donut-ring" cx="65" cy="65" r="50" fill="none" stroke="#e8844a" stroke-width="18"stroke-dasharray="57 257" stroke-dashoffset="-157" style="stroke-dashoffset:-157"/><circle class="donut-ring" cx="65" cy="65" r="50" fill="none" stroke="#d94f38" stroke-width="18"stroke-dasharray="22 292" stroke-dashoffset="-214" style="stroke-dashoffset:-214"/><text x="65" y="60" text-anchor="middle" font-family="DM Serif Display,serif" font-size="20" fill="#f2ede8">217</text><text x="65" y="75" text-anchor="middle" font-family="Space Mono,monospace" font-size="7" fill="rgba(242,237,232,0.28)" letter-spacing="1">PWNED</text></svg><div class="legend"><div class="leg-row"><div class="leg-dot" style="background:#4ab44a"></div>Easy — 45%</div><div class="leg-row"><div class="leg-dot" style="background:#f5c842"></div>Medium — 30%</div><div class="leg-row"><div class="leg-dot" style="background:#e8844a"></div>Hard — 18%</div><div class="leg-row"><div class="leg-dot" style="background:#d94f38"></div>Insane — 7%</div></div></div></div><div class="hcard"><div class="hcard-label">Favourites</div><div class="mach-grid"><div class="mach"><div class="mach-diff d-insane">Insane</div><div class="mach-name">Hathor</div><div class="mach-os">Windows</div><div class="mach-note">// Exploit dev + DLL chain</div><div class="mach-owned">owned</div></div><div class="mach"><div class="mach-diff d-insane">Insane</div><div class="mach-name">Minion</div><div class="mach-os">Windows</div><div class="mach-note">// ICMP shell, wrote auto-pwn</div><div class="mach-owned">owned</div></div><div class="mach"><div class="mach-diff d-hard">Hard</div><div class="mach-name">Mist</div><div class="mach-os">Windows</div><div class="mach-note">// Lateral move + token abuse</div><div class="mach-owned">owned</div></div><div class="mach"><div class="mach-diff d-insane">Insane</div><div class="mach-name">Ghost</div><div class="mach-os">Windows</div><div class="mach-note">// Complex AD chain, deep enum</div><div class="mach-owned">owned</div></div></div></div></div></div></section>
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 48px;
+    background: rgba(14,14,14,0.95); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--bright); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text2); transition: color 0.15s; text-transform: uppercase; }
+  .nav-links a:hover { color: var(--bright); }
+  .nav-right { font-family: var(--mono); font-size: 10px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+  .nav-right::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 
-<section id="skills"><div class="sec-head"><h2 class="sec-title">Skills</h2><span class="sec-label">Capabilities</span></div><div class="skills-grid"><div class="sk-cell"><div class="sk-name">Penetration Testing</div><div class="sk-tags"><span class="sktag hi">OSCP+</span><span class="sktag hi">Active Directory</span><span class="sktag">Network</span><span class="sktag">Web</span><span class="sktag">Priv Esc</span></div></div><div class="sk-cell"><div class="sk-name">Reverse Engineering</div><div class="sk-tags"><span class="sktag hi">x64 ASM</span><span class="sktag hi">Ghidra</span><span class="sktag">IDA</span><span class="sktag">WinDbg</span><span class="sktag">Exploit Dev</span></div></div><div class="sk-cell"><div class="sk-name">Tooling & Development</div><div class="sk-tags"><span class="sktag hi">Python</span><span class="sktag hi">C</span><span class="sktag">Bash</span><span class="sktag">NASM</span><span class="sktag">PowerShell</span><span class="sktag">Windows Internals</span></div></div><div class="sk-cell"><div class="sk-name">AV/EDR Evasion</div><div class="sk-tags"><span class="sktag hi">Shellcode</span><span class="sktag hi">UUID Obfusc.</span><span class="sktag">XOR</span><span class="sktag">PE Craft</span></div></div><div class="sk-cell"><div class="sk-name">IoT Security</div><div class="sk-tags"><span class="sktag hi">Firmware</span><span class="sktag">UART/JTAG</span><span class="sktag">Embedded</span><span class="sktag">RF</span></div></div><div class="sk-cell"><div class="sk-name">OSINT & Intelligence</div><div class="sk-tags"><span class="sktag hi">OSINT</span><span class="sktag">Recon</span><span class="sktag">HUMINT</span><span class="sktag">CTI</span></div></div></div>
+  /* ── HERO ── */
+  #hero {
+    padding: 80px 48px 72px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 48px;
+    align-items: end;
+  }
+  .hero-left {}
+  .hero-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+  .hero-name { font-family: var(--mono); font-weight: 600; font-size: clamp(36px, 5vw, 64px); color: var(--bright); letter-spacing: -1px; line-height: 1; margin-bottom: 16px; }
+  .hero-name span { color: var(--accent); }
+  .hero-desc { font-size: 15px; font-weight: 300; color: var(--text2); line-height: 1.8; max-width: 560px; margin-bottom: 32px; }
+  .hero-desc strong { color: var(--text); font-weight: 400; }
+  .hero-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; padding: 4px 12px; border: 1px solid var(--border2); color: var(--text2); text-transform: uppercase; }
+  .pill.hi { border-color: rgba(124,252,110,0.3); color: var(--accent); background: rgba(124,252,110,0.05); }
 
-<div class="certs-block"><div class="certs-label">Certifications</div><div class="certs-row"><span class="cert-pill top"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>OSCP+<span class="ci">· expires Jul 2029</span></span><span class="cert-pill strong"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>OSCP<span class="ci">· OffSec, Jul 2026</span></span><span class="cert-pill strong"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>CompTIA Network+<span class="ci">· expires Nov 2028</span></span><span class="cert-pill strong"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Cisco Ethical Hacker<span class="ci">· Mar 2026</span></span><span class="cert-pill strong"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>OSINT — Basel Institute of Governance<span class="ci">· Dec 2025</span></span></div><div class="data-row"><span class="data-label">Also:</span><span class="dtag">Excel</span><span class="dtag">Python</span><span class="dtag">SQL</span><span class="dtag">Power BI</span><span class="dtag">Tableau</span><span class="dtag">BIDA® — CFI</span><span class="dtag">FinTech Industry Professional</span></div></div></section>
+  .hero-right { text-align: right; }
+  .hero-stat-n { font-family: var(--mono); font-size: 11px; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+  .hero-stat-v { font-family: var(--serif); font-size: 28px; color: var(--bright); line-height: 1; margin-bottom: 20px; }
+  .hero-stat-v em { font-style: italic; color: var(--accent); }
 
-<section id="contact"><div class="contact-inner"><div class="contact-eyebrow">// let's connect</div><h2 class="contact-heading">Get in<br><em>Touch.</em></h2><p class="contact-sub">Open to red team roles, CTF collabs, and research opportunities.</p><div class="contact-links"><a href="https://github.com/00xAuto" target="_blank" class="contact-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a><a href="https://app.hackthebox.com/users/1018606" target="_blank" class="contact-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9959 0L3 4.7788V14.3419L11.9959 19.1207L21 14.3419V4.7788L11.9959 0ZM19.5395 13.3979L11.9959 17.5091L4.4523 13.3979V5.7228L11.9959 1.6116L19.5395 5.7228V13.3979Z"/><path d="M11.9959 5.7228L7.3614 8.2603V13.3354L11.9959 15.8729L16.6304 13.3354V8.2603L11.9959 5.7228Z"/></svg>HackTheBox</a><a href="mailto:00xauto@gmail.com" class="contact-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>Email</a></div></div></section>
+  /* ── SECTION BASE ── */
+  section { padding: 64px 48px; border-bottom: 1px solid var(--border); }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 40px; }
+  .sec-title { font-family: var(--mono); font-weight: 600; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text2); }
+  .sec-count { font-family: var(--mono); font-size: 11px; color: var(--border2); }
 
-<footer><span>00xAuto · Red Team Operator</span><span>Updated Jul 17, 2026</span></footer>
+  /* ── BLOG ── */
+  #blog { background: var(--bg); }
+
+  .blog-categories { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; }
+  .cat-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 14px; border: 1px solid var(--border); color: var(--text2);
+    background: transparent; cursor: pointer; transition: all 0.15s;
+  }
+  .cat-btn:hover, .cat-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(124,252,110,0.04); }
+
+  .blog-grid { display: flex; flex-direction: column; gap: 0; }
+
+  .post-row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 24px;
+    align-items: start;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  .post-row:first-child { border-top: 1px solid var(--border); }
+  .post-row:hover { background: rgba(255,255,255,0.02); }
+  .post-row:hover .post-title { color: var(--accent); }
+  .post-row:hover .post-arrow { opacity: 1; }
+
+  .post-date { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 0.06em; padding-top: 3px; white-space: nowrap; }
+  .post-body {}
+  .post-series { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
+  .post-title { font-size: 15px; font-weight: 400; color: var(--bright); margin-bottom: 4px; transition: color 0.15s; line-height: 1.4; }
+  .post-desc { font-size: 12px; font-weight: 300; color: var(--text2); line-height: 1.6; }
+  .post-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 2px; }
+  .post-tags { display: flex; gap: 5px; justify-content: flex-end; flex-wrap: wrap; }
+  .ptag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border); color: var(--text2); white-space: nowrap; }
+  .ptag.heap { color: #f5a623; border-color: rgba(245,166,35,0.3); }
+  .ptag.stack { color: var(--accent2); border-color: rgba(77,184,255,0.3); }
+  .ptag.kernel { color: var(--red); border-color: rgba(255,95,87,0.3); }
+  .ptag.tool { color: var(--accent); border-color: rgba(124,252,110,0.3); }
+  .ptag.wip { color: var(--text2); border-color: var(--border); background: rgba(255,255,255,0.03); }
+  .post-arrow { font-family: var(--mono); font-size: 11px; color: var(--accent); opacity: 0; transition: opacity 0.15s; }
+
+  .coming-soon-row {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    opacity: 0.4;
+  }
+
+  /* ── PROJECTS ── */
+  #projects { background: var(--bg2); }
+
+  .proj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .proj-card { background: var(--bg2); padding: 24px 28px; transition: background 0.15s; }
+  .proj-card:hover { background: var(--bg3); }
+  .proj-card:hover .proj-name { color: var(--accent); }
+  .proj-card:hover .proj-link { opacity: 1; }
+  .proj-cat { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 10px; }
+  .proj-name { font-size: 15px; font-weight: 400; color: var(--bright); margin-bottom: 6px; transition: color 0.15s; line-height: 1.3; }
+  .proj-desc { font-size: 12px; font-weight: 300; color: var(--text2); line-height: 1.7; margin-bottom: 14px; }
+  .proj-footer { display: flex; align-items: center; justify-content: space-between; }
+  .proj-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .proj-link { font-family: var(--mono); font-size: 10px; color: var(--accent); opacity: 0; transition: opacity 0.15s; white-space: nowrap; }
+
+  /* ── HTB STRIP ── */
+  #htb { background: var(--bg); padding: 48px 48px; }
+  .htb-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .htb-cell { background: var(--bg2); padding: 20px 20px; }
+  .htb-cell-l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+  .htb-cell-v { font-family: var(--serif); font-size: 24px; color: var(--bright); line-height: 1; }
+  .htb-cell-v em { font-style: italic; color: var(--accent); }
+  .htb-cell-v.green { color: var(--accent); }
+  .htb-cell-v.amber { color: #f5a623; }
+  .htb-cell-sub { font-family: var(--mono); font-size: 9px; color: var(--text2); margin-top: 4px; }
+
+  /* season toggle */
+  .htb-head-right { display: flex; gap: 6px; }
+  .s-btn { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 3px 10px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .s-btn.on { border-color: rgba(124,252,110,0.4); color: var(--accent); background: rgba(124,252,110,0.06); }
+
+  /* ── CONTACT ── */
+  #contact { background: var(--bg2); padding: 64px 48px; }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .contact-left {}
+  .contact-h { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); color: var(--bright); line-height: 1; margin-bottom: 16px; letter-spacing: -0.5px; }
+  .contact-h em { font-style: italic; color: var(--accent); }
+  .contact-sub { font-size: 13px; font-weight: 300; color: var(--text2); line-height: 1.8; max-width: 380px; }
+  .contact-links { display: flex; flex-direction: column; gap: 2px; }
+  .c-link { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border: 1px solid var(--border); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text2); transition: all 0.15s; }
+  .c-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,252,110,0.03); }
+  .c-link-arrow { opacity: 0; transition: opacity 0.15s; }
+  .c-link:hover .c-link-arrow { opacity: 1; }
+
+  footer { padding: 20px 48px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--border2); letter-spacing: 0.06em; }
+
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  @media (max-width: 900px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    section, #hero, #htb, #contact { padding: 48px 20px; }
+    #hero { grid-template-columns: 1fr; }
+    .hero-right { text-align: left; }
+    .proj-grid { grid-template-columns: 1fr; }
+    .htb-strip { grid-template-columns: repeat(3, 1fr); }
+    .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+    .post-row { grid-template-columns: 60px 1fr; }
+    .post-right { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span>00x</span>Auto</div>
+  <ul class="nav-links">
+    <li><a href="#blog">Blog</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">OSCP+ · Grandmaster</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag">// exploit dev · vuln research · red team</div>
+    <div class="hero-name"><span>00x</span>Auto<span class="cursor"></span></div>
+    <p class="hero-desc">
+      Writing about <strong>Windows kernel exploitation</strong>, <strong>heap internals</strong>, <strong>ROP chains</strong>, and <strong>vulnerability research</strong>. OSCP+ certified. Grandmaster on HTB. Currently focused on Windows kernel vulnresearch and exploit dev.
+    </p>
+    <div class="hero-pills">
+      <span class="pill hi">OSCP+</span>
+      <span class="pill hi">Grandmaster</span>
+      <span class="pill">Windows Kernel</span>
+      <span class="pill">Exploit Dev</span>
+      <span class="pill">Vuln Research</span>
+      <span class="pill">RE</span>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-stat-n">HTB Rank</div>
+    <div class="hero-stat-v">Grand<em>master</em></div>
+    <div class="hero-stat-n">Machines Owned</div>
+    <div class="hero-stat-v">217<em>+</em></div>
+    <div class="hero-stat-n">Weekly Streak</div>
+    <div class="hero-stat-v">24<em>wks</em></div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section id="blog">
+  <div class="sec-head">
+    <span class="sec-title">// Blog & Writeups</span>
+    <span class="sec-count">8 posts · 3 series</span>
+  </div>
+
+  <div class="blog-categories">
+    <button class="cat-btn active" onclick="filterPosts('all', this)">All</button>
+    <button class="cat-btn" onclick="filterPosts('heap', this)">Heap Exploitation</button>
+    <button class="cat-btn" onclick="filterPosts('stack', this)">Stack & ROP</button>
+    <button class="cat-btn" onclick="filterPosts('kernel', this)">Windows Kernel</button>
+    <button class="cat-btn" onclick="filterPosts('tool', this)">Tools & Research</button>
+  </div>
+
+  <div class="blog-grid" id="blog-grid">
+
+    <!-- KERNEL -->
+    <div class="post-row" data-cat="kernel" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Windows Kernel · Capcom.sys</div>
+        <div class="post-title">Capcom.sys Kernel Exploit — CVE-2016-7255: Full Documentation</div>
+        <div class="post-desc">Detailed walkthrough of the Capcom.sys vulnerable driver. IOCTL abuse, disabling SMEP via CR4 manipulation, and arbitrary kernel code execution from user mode.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag kernel">Kernel</span><span class="ptag kernel">CVE</span><span class="ptag kernel">Driver</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- HEAP 0 -->
+    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Protostar Series · Heap 0/4</div>
+        <div class="post-title">Protostar Heap0 — Introduction to Heap Corruption</div>
+        <div class="post-desc">Understanding glibc heap layout, chunk metadata, and how a simple overflow into an adjacent chunk can redirect execution. The foundation of heap exploitation.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag heap">Heap</span><span class="ptag heap">Protostar</span><span class="ptag heap">Linux</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- HEAP 1 -->
+    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Protostar Series · Heap 1/4</div>
+        <div class="post-title">Protostar Heap1 — Corrupting Function Pointers on the Heap</div>
+        <div class="post-desc">Moving from data corruption to control flow hijack. Overwriting a function pointer stored on the heap to redirect execution to a target address.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag heap">Heap</span><span class="ptag heap">Protostar</span><span class="ptag heap">Func Ptr</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- HEAP 2 -->
+    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Protostar Series · Heap 2/4</div>
+        <div class="post-title">Protostar Heap2 — Use After Free Fundamentals</div>
+        <div class="post-desc">First look at UAF. Freeing a chunk and reclaiming it with controlled data to hijack a vtable pointer and gain code execution.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag heap">UAF</span><span class="ptag heap">Protostar</span><span class="ptag heap">Vtable</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- HEAP 3 -->
+    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Protostar Series · Heap 3/4</div>
+        <div class="post-title">Protostar Heap3 — dlmalloc Unlink Exploitation</div>
+        <div class="post-desc">The classic unlink attack. Exploiting the dlmalloc consolidation routine to perform an arbitrary 4-byte write anywhere in memory.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag heap">Unlink</span><span class="ptag heap">Protostar</span><span class="ptag heap">dlmalloc</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- BOF -->
+    <div class="post-row" data-cat="stack" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Stack Exploitation</div>
+        <div class="post-title">Buffer Overflows from Scratch — Stack Layout, EIP Control, and Shellcode</div>
+        <div class="post-desc">Ground-up explanation of x86 stack frames, how a classic stack BOF works, finding offsets, bad characters, and dropping shellcode. Demonstrated on Vulnserver TRUN.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag stack">BOF</span><span class="ptag stack">Vulnserver</span><span class="ptag stack">x86</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- ROP -->
+    <div class="post-row" data-cat="stack" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Stack Exploitation</div>
+        <div class="post-title">ROP Chains — Bypassing DEP with Return Oriented Programming</div>
+        <div class="post-desc">When shellcode is not an option. Building ROP chains to call VirtualProtect, understanding gadget chaining, stack pivots, and defeating DEP on Windows.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag stack">ROP</span><span class="ptag stack">DEP Bypass</span><span class="ptag stack">Windows</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Vulnserver GMON -->
+    <div class="post-row" data-cat="stack" onclick="window.open('#','_blank')">
+      <div class="post-date">2026</div>
+      <div class="post-body">
+        <div class="post-series">Vulnserver Series</div>
+        <div class="post-title">Vulnserver GMON — SEH Overwrites and Exception Handler Hijacking</div>
+        <div class="post-desc">Structured Exception Handler exploitation. Overwriting nSEH and SEH records, using pop/pop/ret gadgets, and bypassing SafeSEH to gain control flow.</div>
+      </div>
+      <div class="post-right">
+        <div class="post-tags"><span class="ptag stack">SEH</span><span class="ptag stack">Vulnserver</span><span class="ptag stack">SafeSEH</span></div>
+        <div class="post-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- COMING SOON rows -->
+    <div class="coming-soon-row" data-cat="kernel">
+      <div class="post-date" style="font-family:var(--mono);font-size:10px;color:var(--border2);">Soon</div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--border2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Windows Kernel</div>
+        <div style="font-size:14px;color:var(--border2);">Windows Kernel Pool Exploitation — From Pool Overflow to LPE</div>
+      </div>
+    </div>
+
+    <div class="coming-soon-row" data-cat="kernel">
+      <div class="post-date" style="font-family:var(--mono);font-size:10px;color:var(--border2);">Soon</div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--border2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Windows Kernel</div>
+        <div style="font-size:14px;color:var(--border2);">Token Stealing Shellcode — Privilege Escalation via Kernel Mode</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="sec-head">
+    <span class="sec-title">// Public Tools</span>
+    <a href="https://github.com/00xAuto" style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:0.08em;" target="_blank">github.com/00xAuto →</a>
+  </div>
+
+  <div class="proj-grid">
+    <div class="proj-card">
+      <div class="proj-cat">AV Evasion · C</div>
+      <div class="proj-name">Nemesis AV-Bypass Shell</div>
+      <div class="proj-desc">Windows reverse shell with XOR-obfuscated C2 config. IP never stored in plaintext — encrypted at build time, decrypted into a stack buffer then zeroed before connect(). No console, stripped symbols.</div>
+      <div class="proj-footer">
+        <div class="proj-tags"><span class="ptag tool">C</span><span class="ptag tool">AV Evasion</span><span class="ptag">Winsock</span></div>
+        <a href="https://github.com/00xAuto/Nemesis-AV-bypass-shell" target="_blank" class="proj-link">GitHub →</a>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-cat">Shellcode Loader · C</div>
+      <div class="proj-name">UUIDFuscation Loader</div>
+      <div class="proj-desc">Shellcode loader using UUID string obfuscation to evade static AV. Shellcode encoded as UUID strings, decoded at runtime with UuidFromStringA, executed in a heap-allocated RX region.</div>
+      <div class="proj-footer">
+        <div class="proj-tags"><span class="ptag tool">C</span><span class="ptag tool">UUID</span><span class="ptag">Shellcode</span></div>
+        <a href="https://github.com/00xAuto/UUIDFuscation-Loader" target="_blank" class="proj-link">GitHub →</a>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-cat">RCE · Python</div>
+      <div class="proj-name">Special ODT Macro RCE</div>
+      <div class="proj-desc">Generates malicious .odt files that fire a payload on open in LibreOffice. Dual-mode: reverse shell via dom:load macro event, or NTLM hash capture via embedded UNC path.</div>
+      <div class="proj-footer">
+        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">RCE</span><span class="ptag">LibreOffice</span></div>
+        <a href="https://github.com/00xAuto/Special-ODT-Macro-RCE" target="_blank" class="proj-link">GitHub →</a>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-cat">ICMP Shell · Python</div>
+      <div class="proj-name">Minion HTB Auto-Pwn</div>
+      <div class="proj-desc">Full automated exploit chain for HTB: Minion (Insane/Windows). Data exfil over ICMP only — firewall drops all TCP/UDP. Interactive admin shell via PowerShell Ping.Send() and Scapy sniffing.</div>
+      <div class="proj-footer">
+        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">ICMP</span><span class="ptag">Scapy</span></div>
+        <a href="https://github.com/00xAuto/Minion-HTB-Pwner-Script" target="_blank" class="proj-link">GitHub →</a>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-cat">Post-Exploitation · Python</div>
+      <div class="proj-name">IMAP Mailbox Dumper</div>
+      <div class="proj-desc">Dumps every IMAP folder — headers and full body — to stdout. Useful post-credential-spray on internal mail servers. SSL support, per-folder error handling, binary attachment safe.</div>
+      <div class="proj-footer">
+        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">IMAP</span><span class="ptag">Post-Exploit</span></div>
+        <a href="https://github.com/00xAuto/IMAP-Mailbox-Dumper" target="_blank" class="proj-link">GitHub →</a>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-cat">AD Enumeration · Python</div>
+      <div class="proj-name">Windows SID Parser</div>
+      <div class="proj-desc">Parses raw Windows Security Identifier bytes into human-readable SID strings. Useful during AD enumeration, LDAP/LDIF analysis, and memory forensics. Decodes all sub-authorities.</div>
+      <div class="proj-footer">
+        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">SID</span><span class="ptag">AD</span></div>
+        <a href="https://github.com/00xAuto/Microsoft-SQL-SID-bruteforce" target="_blank" class="proj-link">GitHub →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="contact-left">
+      <div class="contact-h">Get in<br><em>touch.</em></div>
+      <br>
+      <p class="contact-sub">Open to vuln research collabs, red team roles, and conversations about Windows internals, exploit dev, or kernel security.</p>
+    </div>
+    <div class="contact-links">
+      <a href="https://github.com/00xAuto" target="_blank" class="c-link">
+        <span>github.com/00xAuto</span><span class="c-link-arrow">→</span>
+      </a>
+      <a href="https://app.hackthebox.com/users/1018606" target="_blank" class="c-link">
+        <span>hackthebox.com/users/0xAut0</span><span class="c-link-arrow">→</span>
+      </a>
+      <a href="mailto:00xauto@gmail.com" class="c-link">
+        <span>00xauto@gmail.com</span><span class="c-link-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>00xAuto · Exploit Dev · Vuln Research</span>
+  <span>OSCP+ · Grandmaster · 2026</span>
+</footer>
 
 <script>
-const seasons = {
-  10: { rank:'#116', tier:'Holo Tier · S10',  points:'825', flags:'26<span style="font-family:var(--mono);font-size:11px;color:rgba(242,237,232,0.2)">/26</span>', rankClass:'' },
-  11: { rank:'#83',  tier:'Ruby Tier · S11',  points:'460', flags:'16<span style="font-family:var(--mono);font-size:11px;color:rgba(242,237,232,0.2)">/26</span>', rankClass:'ruby' }
-};
-function setSeason(n) {
-  const s = seasons[n];
-  const rankEl = document.getElementById('season-rank');
-  rankEl.textContent = s.rank;
-  rankEl.className = 'rank-num' + (s.rankClass ? ' ' + s.rankClass : '');
-  document.getElementById('season-tier').textContent = s.tier;
-  document.getElementById('season-points').textContent = s.points;
-  document.getElementById('season-flags').innerHTML = s.flags;
-  document.getElementById('btn-s10').className = 'sbtn'+(n===10?' on':'');
-  document.getElementById('btn-s11').className = 'sbtn'+(n===11?' on':'');
-}
-const htbSection = document.getElementById('htb');
-const xpFill = document.querySelector('.xp-fill');
-const donutRings = document.querySelectorAll('.donut-ring');
-let animated = false;
-const obs = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting && !animated) {
-    animated = true;
-    xpFill.style.animation = 'xpGrow 1.4s cubic-bezier(.4,0,.2,1) forwards';
-    donutRings.forEach((r, i) => {
-      r.style.animation = `donutDraw 1.2s cubic-bezier(.4,0,.2,1) ${i * 0.15}s forwards`;
+  // Season toggle
+  const SD = {
+    10: { rank:'#116', tier:'Holo Tier · S10', pts:'825', flags:'Flags: 26/26' },
+    11: { rank:'#252', tier:'Silver Tier · S11', pts:'110', flags:'Flags: 4/24' }
+  };
+  function setSeason(n) {
+    const d = SD[n];
+    document.getElementById('s-rank').textContent = d.rank;
+    document.getElementById('s-tier').textContent = d.tier;
+    document.getElementById('s-pts').textContent  = d.pts;
+    document.getElementById('s-flags').textContent = d.flags;
+    document.getElementById('btn-s10').className = 's-btn' + (n===10?' on':'');
+    document.getElementById('btn-s11').className = 's-btn' + (n===11?' on':'');
+  }
+
+  // Blog category filter
+  function filterPosts(cat, btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.post-row, .coming-soon-row').forEach(row => {
+      row.style.display = (cat === 'all' || row.dataset.cat === cat) ? '' : 'none';
     });
   }
-}, { threshold: 0.2 });
-obs.observe(htbSection);
-xpFill.style.animation = 'none';
-donutRings.forEach(r => r.style.animation = 'none');
+
+  // Nav active
+  const secs = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    secs.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+    links.forEach(a => { a.style.color = a.getAttribute('href') === '#'+cur ? 'var(--bright)' : ''; });
+  });
 </script>
-</body></html>
+</body>
+</html>
