@@ -2,525 +2,743 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>00xAuto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>00xAuto — exploit dev · vuln research</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:      #0e0e0e;
-    --bg2:     #141414;
-    --bg3:     #1a1a1a;
-    --border:  #242424;
-    --border2: #2e2e2e;
-    --text:    #c8c8c8;
-    --text2:   #888;
-    --bright:  #f0f0f0;
-    --accent:  #7cfc6e;
-    --accent2: #4db8ff;
-    --red:     #ff5f57;
-    --orange:  #e8844a;
-    --yellow:  #f5c842;
-    --mono:    'IBM Plex Mono', monospace;
-    --sans:    'IBM Plex Sans', sans-serif;
-    --serif:   'IBM Plex Serif', serif;
-  }
+:root {
+  --bg:      #070709;
+  --surface: #0e0c16;
+  --text:    #9494ae;
+  --heading: #d4d4ec;
+  --muted:   #454560;
+  --accent:  #7c7bf7;
+  --accent2: #22d3ee;
+  --rule:    #14132a;
+  --code-fg: #7dd3fc;
+  --tag-bg:  #0c0b18;
+  --tag-bd:  #201e38;
+  --mono: 'IBM Plex Mono','Consolas','Menlo',monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.7; overflow-x: hidden; }
-  a { color: inherit; text-decoration: none; }
+/* ── Background system ──────────────────────────────────────────────
+   Three canvases, each one colour channel of the entity art.
+   screen-blended inside isolation:isolate — at rest they reconstruct
+   the original; mouse velocity splits them (chromatic aberration).    */
+#bg-wrap {
+  position: fixed; inset: 0; z-index: 0;
+  isolation: isolate;
+  background: var(--bg);   /* black base required for screen math */
+  pointer-events: none;
+}
+#bg-r, #bg-g, #bg-b {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
 
-  .cursor {
-    display: inline-block; width: 8px; height: 14px;
-    background: var(--accent); vertical-align: text-bottom;
-    animation: blink 1s step-end infinite; margin-left: 1px;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
+/* Scanlines — very light, tighten on movement */
+#scanlines {
+  position: fixed; inset: 0; z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.025) 0px, rgba(0,0,0,.025) 1px,
+    transparent 1px, transparent 2px
+  );
+  opacity: .45; transition: opacity .3s;
+}
+#scanlines.hot { opacity: .75; }
 
-  /* ── NAV ── */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 48px;
-    background: rgba(14,14,14,0.95); backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-logo { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--bright); letter-spacing: -0.5px; }
-  .nav-logo span { color: var(--accent); }
-  .nav-links { display: flex; gap: 28px; list-style: none; }
-  .nav-links a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text2); transition: color 0.15s; text-transform: uppercase; }
-  .nav-links a:hover { color: var(--bright); }
-  .nav-right { font-family: var(--mono); font-size: 10px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
-  .nav-right::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+/* ── Body / page ───────────────────────────────────────────────────
+   Body is transparent — bg-wrap shows in the margins.
+   .page carries its own solid dark background with a wide blurred
+   box-shadow that dissolves the hard seam into the margin art.       */
+body {
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px; line-height: 1.8;
+  padding: 48px 24px 88px;
+  padding-top:    max(48px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(88px, env(safe-area-inset-bottom, 0px));
+  position: relative; z-index: 10;
+}
+.page {
+  max-width: 680px; margin: 0 auto;
+  background: var(--bg);
+  /* Soft radial shadow blurs the content column into the dark margins */
+  box-shadow: 0 0 120px 80px var(--bg);
+  position: relative;
+}
 
-  /* ── HERO ── */
-  #hero {
-    padding: 80px 48px 72px;
-    border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 48px;
-    align-items: end;
-  }
-  .hero-left {}
-  .hero-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
-  .hero-name { font-family: var(--mono); font-weight: 600; font-size: clamp(36px, 5vw, 64px); color: var(--bright); letter-spacing: -1px; line-height: 1; margin-bottom: 16px; }
-  .hero-name span { color: var(--accent); }
-  .hero-desc { font-size: 15px; font-weight: 300; color: var(--text2); line-height: 1.8; max-width: 560px; margin-bottom: 32px; }
-  .hero-desc strong { color: var(--text); font-weight: 400; }
-  .hero-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-  .pill { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; padding: 4px 12px; border: 1px solid var(--border2); color: var(--text2); text-transform: uppercase; }
-  .pill.hi { border-color: rgba(124,252,110,0.3); color: var(--accent); background: rgba(124,252,110,0.05); }
+/* ── Typography ─────────────────────────────────────────────────── */
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent2); text-decoration: underline; text-underline-offset: 3px; }
+a:visited { color: #a78bfa; }
+a:visited:hover { color: var(--accent2); }
+p { margin-bottom: 14px; max-width: 64ch; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--heading); font-weight: 500; }
+code { font-family: var(--mono); font-size: 11.5px; color: var(--code-fg); background: var(--surface); padding: 1px 5px; border-radius: 1px; }
+ul { padding-left: 18px; margin-bottom: 14px; }
+ul li { margin-bottom: 7px; }
+ul li::marker { color: var(--muted); }
 
-  .hero-right { text-align: right; }
-  .hero-stat-n { font-family: var(--mono); font-size: 11px; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-  .hero-stat-v { font-family: var(--serif); font-size: 28px; color: var(--bright); line-height: 1; margin-bottom: 20px; }
-  .hero-stat-v em { font-style: italic; color: var(--accent); }
+/* ── Header ─────────────────────────────────────────────────────── */
+.site-name { font-size: 17px; font-weight: 500; color: var(--heading); letter-spacing: -.3px; margin-bottom: 10px; }
+.site-name a { color: var(--heading); }
+.site-name a:hover { color: var(--accent2); text-decoration: none; }
+.site-nav { list-style: none; padding: 0; display: flex; flex-wrap: wrap; }
+.site-nav li { display: inline; }
+.site-nav li a { font-size: 12px; color: var(--muted); }
+.site-nav li a:hover { color: var(--accent); text-decoration: none; }
+.site-nav li a:visited { color: var(--muted); }
+.site-nav li:not(:last-child)::after { content: ' · '; color: var(--rule); }
 
-  /* ── SECTION BASE ── */
-  section { padding: 64px 48px; border-bottom: 1px solid var(--border); }
-  .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 40px; }
-  .sec-title { font-family: var(--mono); font-weight: 600; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text2); }
-  .sec-count { font-family: var(--mono); font-size: 11px; color: var(--border2); }
+hr { border: none; border-top: 1px solid var(--rule); margin: 34px 0; }
+h2 { font-size: 9.5px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
 
-  /* ── BLOG ── */
-  #blog { background: var(--bg); }
+/* ── Tags ───────────────────────────────────────────────────────── */
+.tag { display: inline-block; font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--tag-bg); border: 1px solid var(--tag-bd); padding: 1px 5px; vertical-align: middle; margin-left: 5px; position: relative; top: -1px; }
+.tag.kernel { color:#f87171; border-color:#3c1212; }
+.tag.heap   { color:#fbbf24; border-color:#3a2a08; }
+.tag.stack  { color:#60a5fa; border-color:#0e2038; }
+.tag.cve    { color:#e879f9; border-color:#2a0d32; }
 
-  .blog-categories { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; }
-  .cat-btn {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 5px 14px; border: 1px solid var(--border); color: var(--text2);
-    background: transparent; cursor: pointer; transition: all 0.15s;
-  }
-  .cat-btn:hover, .cat-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(124,252,110,0.04); }
+/* ── Research ───────────────────────────────────────────────────── */
+.research-list { list-style: none; padding: 0; }
+.research-item { padding: 13px 0; border-bottom: 1px solid var(--rule); }
+.research-item:first-child { border-top: 1px solid var(--rule); }
+.research-title { font-size: 13px; color: var(--heading); display: block; margin-bottom: 5px; }
+.research-title:hover { color: var(--accent2); text-decoration: none; }
+.research-desc { font-size: 12px; line-height: 1.7; }
 
-  .blog-grid { display: flex; flex-direction: column; gap: 0; }
+/* ── Blog ───────────────────────────────────────────────────────── */
+.filter-row { display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 18px; font-size: 11px; }
+.filter-btn { background: none; border: none; cursor: pointer; font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 2px 0; transition: color .12s; }
+.filter-btn:hover { color: var(--heading); }
+.filter-btn.active { color: var(--accent); }
+.filter-btn:not(:last-child)::after { content: ' / '; color: var(--rule); }
+.post-list { list-style: none; padding: 0; }
+.post-item { display: flex; gap: 20px; padding: 11px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.post-item:first-child { border-top: 1px solid var(--rule); }
+.post-meta { font-size: 10px; color: var(--muted); white-space: nowrap; flex-shrink: 0; min-width: 90px; letter-spacing: .04em; }
+.post-body { flex: 1; min-width: 0; }
+.post-link { display: block; font-size: 13px; color: var(--heading); margin-bottom: 3px; line-height: 1.4; }
+.post-link:hover { color: var(--accent2); text-decoration: none; }
+.post-summary { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+.coming-section { margin-top: 2px; border-top: 1px dashed var(--rule); padding-top: 2px; }
+.coming-list { list-style: none; padding: 0; }
+.coming-item { display: flex; gap: 20px; padding: 7px 0; border-bottom: 1px solid var(--rule); align-items: baseline; opacity: .38; }
+.coming-label { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; flex-shrink: 0; min-width: 90px; }
+.coming-title { font-size: 12px; color: var(--muted); font-style: italic; }
 
-  .post-row {
-    display: grid;
-    grid-template-columns: 80px 1fr auto;
-    gap: 24px;
-    align-items: start;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-    cursor: pointer;
-  }
-  .post-row:first-child { border-top: 1px solid var(--border); }
-  .post-row:hover { background: rgba(255,255,255,0.02); }
-  .post-row:hover .post-title { color: var(--accent); }
-  .post-row:hover .post-arrow { opacity: 1; }
+/* ── Projects ───────────────────────────────────────────────────── */
+.proj-list { list-style: none; padding: 0; }
+.proj-item { padding: 13px 0; border-bottom: 1px solid var(--rule); }
+.proj-item:first-child { border-top: 1px solid var(--rule); }
+.proj-header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 5px; }
+.proj-name { font-size: 13px; color: var(--heading); }
+.proj-name:hover { color: var(--accent2); text-decoration: none; }
+.proj-tech { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.proj-desc { font-size: 12px; line-height: 1.7; }
 
-  .post-date { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 0.06em; padding-top: 3px; white-space: nowrap; }
-  .post-body {}
-  .post-series { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
-  .post-title { font-size: 15px; font-weight: 400; color: var(--bright); margin-bottom: 4px; transition: color 0.15s; line-height: 1.4; }
-  .post-desc { font-size: 12px; font-weight: 300; color: var(--text2); line-height: 1.6; }
-  .post-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 2px; }
-  .post-tags { display: flex; gap: 5px; justify-content: flex-end; flex-wrap: wrap; }
-  .ptag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border); color: var(--text2); white-space: nowrap; }
-  .ptag.heap { color: #f5a623; border-color: rgba(245,166,35,0.3); }
-  .ptag.stack { color: var(--accent2); border-color: rgba(77,184,255,0.3); }
-  .ptag.kernel { color: var(--red); border-color: rgba(255,95,87,0.3); }
-  .ptag.tool { color: var(--accent); border-color: rgba(124,252,110,0.3); }
-  .ptag.wip { color: var(--text2); border-color: var(--border); background: rgba(255,255,255,0.03); }
-  .post-arrow { font-family: var(--mono); font-size: 11px; color: var(--accent); opacity: 0; transition: opacity 0.15s; }
+/* ── HTB ────────────────────────────────────────────────────────── */
+.stat-grid { display: inline-grid; grid-template-columns: repeat(3,auto); border: 1px solid var(--rule); margin-bottom: 22px; }
+.stat-cell { padding: 13px 20px; border-right: 1px solid var(--rule); }
+.stat-cell:last-child { border-right: none; }
+.stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 5px; }
+.stat-val { font-size: 17px; color: var(--heading); line-height: 1; }
+.stat-val em { font-style: normal; color: var(--muted); font-size: 12px; }
+.season-label { font-size: 10px; color: var(--muted); margin-bottom: 8px; letter-spacing: .06em; }
+.s-btns { display: flex; gap: 6px; margin-bottom: 16px; }
+.s-btn { background: none; border: 1px solid var(--rule); cursor: pointer; font-family: var(--mono); font-size: 10px; color: var(--muted); padding: 3px 10px; transition: all .1s; }
+.s-btn:hover { color: var(--heading); border-color: var(--muted); }
+.s-btn.on { color: var(--accent); border-color: var(--accent); }
+.season-table { border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
+.season-table th { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 5px 36px 5px 0; border-bottom: 1px solid var(--rule); font-weight: 400; }
+.season-table td { padding: 7px 36px 7px 0; border-bottom: 1px solid var(--rule); }
+.season-table td.k { font-size: 10px; color: var(--muted); white-space: nowrap; }
+.season-table td.v { color: var(--heading); }
+.machines-toggle { font-size: 11px; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; font-family: var(--mono); }
+.machines-toggle:hover { color: var(--accent2); }
+.machine-table { border-collapse: collapse; font-size: 12px; margin-top: 12px; width: 100%; }
+.machine-table th { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 5px 14px 5px 0; border-bottom: 1px solid var(--rule); font-weight: 400; }
+.machine-table td { padding: 7px 14px 7px 0; border-bottom: 1px solid var(--rule); color: var(--text); }
+.machine-table td.os { font-size: 10px; color: var(--muted); }
+.machine-table td.diff-insane { color: #f87171; font-size: 10px; }
+.machine-table td.diff-hard   { color: #fbbf24; font-size: 10px; }
+.machine-table td.diff-medium { color: #60a5fa; font-size: 10px; }
+.machine-table td.diff-easy   { color: var(--code-fg); font-size: 10px; }
 
-  .coming-soon-row {
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 24px;
-    opacity: 0.4;
-  }
+/* ── Certs / Contact ────────────────────────────────────────────── */
+.cert-list { list-style: none; padding: 0; }
+.cert-item { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.cert-item:first-child { border-top: 1px solid var(--rule); }
+.cert-name { font-size: 13px; color: var(--heading); }
+.cert-info { font-size: 10px; color: var(--muted); }
+.contact-list { list-style: none; padding: 0; }
+.contact-list li { font-size: 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.contact-list li:first-child { border-top: 1px solid var(--rule); }
+.contact-list li::before { content: '→  '; color: var(--muted); }
 
-  /* ── PROJECTS ── */
-  #projects { background: var(--bg2); }
+/* ── Footer ─────────────────────────────────────────────────────── */
+.site-footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; letter-spacing: .04em; }
 
-  .proj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-  .proj-card { background: var(--bg2); padding: 24px 28px; transition: background 0.15s; }
-  .proj-card:hover { background: var(--bg3); }
-  .proj-card:hover .proj-name { color: var(--accent); }
-  .proj-card:hover .proj-link { opacity: 1; }
-  .proj-cat { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 10px; }
-  .proj-name { font-size: 15px; font-weight: 400; color: var(--bright); margin-bottom: 6px; transition: color 0.15s; line-height: 1.3; }
-  .proj-desc { font-size: 12px; font-weight: 300; color: var(--text2); line-height: 1.7; margin-bottom: 14px; }
-  .proj-footer { display: flex; align-items: center; justify-content: space-between; }
-  .proj-tags { display: flex; gap: 5px; flex-wrap: wrap; }
-  .proj-link { font-family: var(--mono); font-size: 10px; color: var(--accent); opacity: 0; transition: opacity 0.15s; white-space: nowrap; }
+.hidden { display: none !important; }
 
-  /* ── HTB STRIP ── */
-  #htb { background: var(--bg); padding: 48px 48px; }
-  .htb-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-  .htb-cell { background: var(--bg2); padding: 20px 20px; }
-  .htb-cell-l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
-  .htb-cell-v { font-family: var(--serif); font-size: 24px; color: var(--bright); line-height: 1; }
-  .htb-cell-v em { font-style: italic; color: var(--accent); }
-  .htb-cell-v.green { color: var(--accent); }
-  .htb-cell-v.amber { color: #f5a623; }
-  .htb-cell-sub { font-family: var(--mono); font-size: 9px; color: var(--text2); margin-top: 4px; }
-
-  /* season toggle */
-  .htb-head-right { display: flex; gap: 6px; }
-  .s-btn { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 3px 10px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.15s; }
-  .s-btn.on { border-color: rgba(124,252,110,0.4); color: var(--accent); background: rgba(124,252,110,0.06); }
-
-  /* ── CONTACT ── */
-  #contact { background: var(--bg2); padding: 64px 48px; }
-  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-  .contact-left {}
-  .contact-h { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); color: var(--bright); line-height: 1; margin-bottom: 16px; letter-spacing: -0.5px; }
-  .contact-h em { font-style: italic; color: var(--accent); }
-  .contact-sub { font-size: 13px; font-weight: 300; color: var(--text2); line-height: 1.8; max-width: 380px; }
-  .contact-links { display: flex; flex-direction: column; gap: 2px; }
-  .c-link { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border: 1px solid var(--border); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text2); transition: all 0.15s; }
-  .c-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,252,110,0.03); }
-  .c-link-arrow { opacity: 0; transition: opacity 0.15s; }
-  .c-link:hover .c-link-arrow { opacity: 1; }
-
-  footer { padding: 20px 48px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--border2); letter-spacing: 0.06em; }
-
-  ::-webkit-scrollbar { width: 3px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); }
-  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-  @media (max-width: 900px) {
-    nav { padding: 14px 20px; }
-    .nav-links { display: none; }
-    section, #hero, #htb, #contact { padding: 48px 20px; }
-    #hero { grid-template-columns: 1fr; }
-    .hero-right { text-align: left; }
-    .proj-grid { grid-template-columns: 1fr; }
-    .htb-strip { grid-template-columns: repeat(3, 1fr); }
-    .contact-grid { grid-template-columns: 1fr; gap: 40px; }
-    .post-row { grid-template-columns: 60px 1fr; }
-    .post-right { display: none; }
-  }
+@media (max-width: 600px) {
+  body { padding: 30px 14px 64px; padding-top: max(30px, env(safe-area-inset-top,0px)); }
+  .stat-grid { grid-template-columns: repeat(2,auto); width: 100%; }
+  .stat-cell:nth-child(2) { border-right: none; }
+  .stat-cell:nth-child(3) { border-top: 1px solid var(--rule); grid-column: 1; }
+  .post-item, .coming-item { flex-direction: column; gap: 2px; }
+  .post-meta, .coming-label { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  #bg-wrap, #scanlines { display: none; }
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-logo"><span>00x</span>Auto</div>
-  <ul class="nav-links">
-    <li><a href="#blog">Blog</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#contact">Contact</a></li>
+<div id="bg-wrap">
+  <canvas id="bg-r"></canvas>
+  <canvas id="bg-g"></canvas>
+  <canvas id="bg-b"></canvas>
+</div>
+<div id="scanlines"></div>
+
+<div class="page">
+
+<header>
+  <div class="site-name"><a href="/">00xAuto</a></div>
+  <ul class="site-nav">
+    <li><a href="#about">about</a></li>
+    <li><a href="#research">research</a></li>
+    <li><a href="#blog">blog</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#htb">htb</a></li>
+    <li><a href="#certs">certs</a></li>
+    <li><a href="#contact">contact</a></li>
   </ul>
-  <div class="nav-right">OSCP+ · Grandmaster</div>
-</nav>
+</header>
 
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-left">
-    <div class="hero-tag">// exploit dev · vuln research · red team</div>
-    <div class="hero-name"><span>00x</span>Auto<span class="cursor"></span></div>
-    <p class="hero-desc">
-      Writing about <strong>Windows kernel exploitation</strong>, <strong>heap internals</strong>, <strong>ROP chains</strong>, and <strong>vulnerability research</strong>. OSCP+ certified. Grandmaster on HTB. Currently focused on Windows kernel vulnresearch and exploit dev.
-    </p>
-    <div class="hero-pills">
-      <span class="pill hi">OSCP+</span>
-      <span class="pill hi">Grandmaster</span>
-      <span class="pill">Windows Kernel</span>
-      <span class="pill">Exploit Dev</span>
-      <span class="pill">Vuln Research</span>
-      <span class="pill">RE</span>
-    </div>
-  </div>
-  <div class="hero-right">
-    <div class="hero-stat-n">HTB Rank</div>
-    <div class="hero-stat-v">Grand<em>master</em></div>
-    <div class="hero-stat-n">Machines Owned</div>
-    <div class="hero-stat-v">217<em>+</em></div>
-    <div class="hero-stat-n">Weekly Streak</div>
-    <div class="hero-stat-v">24<em>wks</em></div>
-  </div>
+<hr>
+
+<section id="about">
+  <h2>About</h2>
+  <p>I go by <strong>00xAuto</strong>. I write about <strong>Windows kernel exploitation</strong>,
+  <strong>heap internals</strong>, <strong>ROP chains</strong>, and <strong>vulnerability research</strong>.
+  OSCP+ certified. Grandmaster on HackTheBox.</p>
+  <p>Currently focused on Windows kernel vulnerability research and exploit development — pool exploitation,
+  driver abuse, and privilege escalation chains. I also enjoy binary analysis, defensive bypass,
+  and Linux userland heap primitives.</p>
+  <p>Detailed writeups on everything I learn — CTF solutions and real-world vuln classes.
+  All public tools on <a href="https://github.com/00xAuto" target="_blank">GitHub</a>.</p>
 </section>
 
-<!-- BLOG -->
+<hr>
+
+<section id="research">
+  <h2>Research</h2>
+  <ul class="research-list">
+    <li class="research-item">
+      <a href="https://github.com/00xAuto/HEVD-Write-What-Where" target="_blank" class="research-title">
+        HEVD — Write What Where (WWW) → Local Privilege Escalation <span class="tag kernel">Kernel</span>
+      </a>
+      <div class="research-desc">HackSys Extreme Vulnerable Driver: arbitrary kernel write primitive. Overwriting
+      <code>HalDispatchTable+4</code> to redirect <code>NtQueryIntervalProfile</code> into shellcode.
+      Full ring-0 → ring-3 token-stealing LPE chain on Windows 10. Covers null page mapping, SMEP state, shellcode stability.</div>
+    </li>
+    <li class="research-item">
+      <a href="https://github.com/00xAuto/Trick-Or-Deal---HTB" target="_blank" class="research-title">
+        Trick OR Deal — Use After Free: tcache Poisoning to RCE <span class="tag heap">Heap</span>
+      </a>
+      <div class="research-desc">"Trick Or Deal" PWN challenge. Controlled <code>free()</code> a straight forward Heap exploitation challenge featuring a UAF (Use-After-Free) vulnerability in menu provided in the binary.</div>
+    </li>
+    <li class="research-item">
+      <a href="#" class="research-title">
+        Coming next : Capcom.sys — CVE-2016-7255: Signed Driver Abuse <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
+      </a>
+      <div class="research-desc">Vulnerable signed driver exploitation. IOCTL interface abuse to execute attacker-supplied
+      shellcode with SMEP disabled via <code>CR4</code> manipulation. Full user-mode to kernel code execution, shellcode relay, clean CPU state restore.</div>
+    </li>
+  </ul>
+</section>
+
+<hr>
+
 <section id="blog">
-  <div class="sec-head">
-    <span class="sec-title">// Blog & Writeups</span>
-    <span class="sec-count">8 posts · 3 series</span>
+  <h2>Blog &amp; Writeups</h2>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="filterPosts('all',this)">all</button>
+    <button class="filter-btn" onclick="filterPosts('kernel',this)">kernel</button>
+    <button class="filter-btn" onclick="filterPosts('heap',this)">heap</button>
+    <button class="filter-btn" onclick="filterPosts('stack',this)">stack</button>
   </div>
-
-  <div class="blog-categories">
-    <button class="cat-btn active" onclick="filterPosts('all', this)">All</button>
-    <button class="cat-btn" onclick="filterPosts('heap', this)">Heap Exploitation</button>
-    <button class="cat-btn" onclick="filterPosts('stack', this)">Stack & ROP</button>
-    <button class="cat-btn" onclick="filterPosts('kernel', this)">Windows Kernel</button>
-    <button class="cat-btn" onclick="filterPosts('tool', this)">Tools & Research</button>
-  </div>
-
-  <div class="blog-grid" id="blog-grid">
-
-    <!-- KERNEL -->
-    <div class="post-row" data-cat="kernel" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
+  <ul class="post-list" id="post-list">
+    <li class="post-item" data-cat="kernel">
+      <div class="post-meta">2026 · kernel</div>
       <div class="post-body">
-        <div class="post-series">Windows Kernel · Capcom.sys</div>
-        <div class="post-title">Capcom.sys Kernel Exploit — CVE-2016-7255: Full Documentation</div>
-        <div class="post-desc">Detailed walkthrough of the Capcom.sys vulnerable driver. IOCTL abuse, disabling SMEP via CR4 manipulation, and arbitrary kernel code execution from user mode.</div>
+        <a class="post-link" href="https://github.com/00xAuto/HEVD-Write-What-Where" target="_blank">HEVD — Write What Where: Arbitrary Kernel Write to LPE</a>
+        <div class="post-summary">HalDispatchTable overwrite via WWW primitive. NtQueryIntervalProfile trigger, token-stealing shellcode, Windows 10 LPE chain.</div>
       </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag kernel">Kernel</span><span class="ptag kernel">CVE</span><span class="ptag kernel">Driver</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- HEAP 0 -->
-    <div class="post-row" data-cat="heap" onclick="window.open('_posts/Heap0.md','_blank')">
-      <div class="post-date">2026</div>
+    </li>
+    <li class="post-item" data-cat="heap">
+      <div class="post-meta">2026 · heap</div>
       <div class="post-body">
-        <div class="post-series">Protostar Series · Heap 0/4</div>
-        <div class="post-title">Protostar Heap0 — Introduction to Heap Corruption</div>
-        <div class="post-desc">Understanding glibc heap layout, chunk metadata, and how a simple overflow into an adjacent chunk can redirect execution. The foundation of heap exploitation.</div>
+        <a class="post-link" href="https://github.com/00xAuto/Trick-Or-Deal---HTB" target="_blank">Trick OR Deal — UAF: tcache Poisoning to RCE</a>
+        <div class="post-summary">CTF PWN. UAF → tcache poison → <code>__free_hook</code> overwrite → shell. glibc 2.31 internals and safe-linking bypass.</div>
       </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag heap">Heap</span><span class="ptag heap">Protostar</span><span class="ptag heap">Linux</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- HEAP 1 -->
-    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
+    </li>
+    <li class="post-item" data-cat="kernel">
+      <div class="post-meta">2026 · kernel</div>
       <div class="post-body">
-        <div class="post-series">Protostar Series · Heap 1/4</div>
-        <div class="post-title">Protostar Heap1 — Corrupting Function Pointers on the Heap</div>
-        <div class="post-desc">Moving from data corruption to control flow hijack. Overwriting a function pointer stored on the heap to redirect execution to a target address.</div>
+        <a class="post-link" href="#">Capcom.sys — CVE-2016-7255: SMEP Bypass &amp; Kernel Exec</a>
+        <div class="post-summary">IOCTL abuse on signed vulnerable driver, CR4 manipulation to disable SMEP, arbitrary kernel code execution from user mode.</div>
       </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag heap">Heap</span><span class="ptag heap">Protostar</span><span class="ptag heap">Func Ptr</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- HEAP 2 -->
-    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
-      <div class="post-body">
-        <div class="post-series">Protostar Series · Heap 2/4</div>
-        <div class="post-title">Protostar Heap2 — Use After Free Fundamentals</div>
-        <div class="post-desc">First look at UAF. Freeing a chunk and reclaiming it with controlled data to hijack a vtable pointer and gain code execution.</div>
-      </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag heap">UAF</span><span class="ptag heap">Protostar</span><span class="ptag heap">Vtable</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- HEAP 3 -->
-    <div class="post-row" data-cat="heap" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
-      <div class="post-body">
-        <div class="post-series">Protostar Series · Heap 3/4</div>
-        <div class="post-title">Protostar Heap3 — dlmalloc Unlink Exploitation</div>
-        <div class="post-desc">The classic unlink attack. Exploiting the dlmalloc consolidation routine to perform an arbitrary 4-byte write anywhere in memory.</div>
-      </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag heap">Unlink</span><span class="ptag heap">Protostar</span><span class="ptag heap">dlmalloc</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- BOF -->
-    <div class="post-row" data-cat="stack" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
-      <div class="post-body">
-        <div class="post-series">Stack Exploitation</div>
-        <div class="post-title">Buffer Overflows from Scratch — Stack Layout, EIP Control, and Shellcode</div>
-        <div class="post-desc">Ground-up explanation of x86 stack frames, how a classic stack BOF works, finding offsets, bad characters, and dropping shellcode. Demonstrated on Vulnserver TRUN.</div>
-      </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag stack">BOF</span><span class="ptag stack">Vulnserver</span><span class="ptag stack">x86</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- ROP -->
-    <div class="post-row" data-cat="stack" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
-      <div class="post-body">
-        <div class="post-series">Stack Exploitation</div>
-        <div class="post-title">ROP Chains — Bypassing DEP with Return Oriented Programming</div>
-        <div class="post-desc">When shellcode is not an option. Building ROP chains to call VirtualProtect, understanding gadget chaining, stack pivots, and defeating DEP on Windows.</div>
-      </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag stack">ROP</span><span class="ptag stack">DEP Bypass</span><span class="ptag stack">Windows</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- Vulnserver GMON -->
-    <div class="post-row" data-cat="stack" onclick="window.open('#','_blank')">
-      <div class="post-date">2026</div>
-      <div class="post-body">
-        <div class="post-series">Vulnserver Series</div>
-        <div class="post-title">Vulnserver GMON — SEH Overwrites and Exception Handler Hijacking</div>
-        <div class="post-desc">Structured Exception Handler exploitation. Overwriting nSEH and SEH records, using pop/pop/ret gadgets, and bypassing SafeSEH to gain control flow.</div>
-      </div>
-      <div class="post-right">
-        <div class="post-tags"><span class="ptag stack">SEH</span><span class="ptag stack">Vulnserver</span><span class="ptag stack">SafeSEH</span></div>
-        <div class="post-arrow">→</div>
-      </div>
-    </div>
-
-    <!-- COMING SOON rows -->
-    <div class="coming-soon-row" data-cat="kernel">
-      <div class="post-date" style="font-family:var(--mono);font-size:10px;color:var(--border2);">Soon</div>
-      <div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--border2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Windows Kernel</div>
-        <div style="font-size:14px;color:var(--border2);">Windows Kernel Pool Exploitation — From Pool Overflow to LPE</div>
-      </div>
-    </div>
-
-    <div class="coming-soon-row" data-cat="kernel">
-      <div class="post-date" style="font-family:var(--mono);font-size:10px;color:var(--border2);">Soon</div>
-      <div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--border2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Windows Kernel</div>
-        <div style="font-size:14px;color:var(--border2);">Token Stealing Shellcode — Privilege Escalation via Kernel Mode</div>
-      </div>
-    </div>
-
+    </li>
+  </ul>
+  <div class="coming-section">
+    <ul class="coming-list" id="coming-list">
+      <li class="coming-item" data-cat="heap"><div class="coming-label">heap · pending</div><div class="coming-title">Protostar Heap0–3 — dlmalloc Fundamentals &amp; Unlink Attack</div></li>
+      <li class="coming-item" data-cat="stack"><div class="coming-label">stack · pending</div><div class="coming-title">Buffer Overflows: Stack Layout, EIP Control, Shellcode</div></li>
+      <li class="coming-item" data-cat="stack"><div class="coming-label">stack · pending</div><div class="coming-title">ROP Chains — Bypassing DEP with Return Oriented Programming</div></li>
+      <li class="coming-item" data-cat="stack"><div class="coming-label">stack · pending</div><div class="coming-title">Vulnserver GMON — SEH Overwrites &amp; Exception Handler Hijacking</div></li>
+      <li class="coming-item" data-cat="kernel"><div class="coming-label">kernel · pending</div><div class="coming-title">Windows Kernel Pool Exploitation &amp; Token Stealing Shellcode</div></li>
+      <li class="coming-item" data-cat="kernel"><div class="coming-label">kernel · pending</div><div class="coming-title">OSED Notes — Advanced Windows Exploit Development</div></li>
+    </ul>
   </div>
 </section>
 
-<!-- PROJECTS -->
+<hr>
+
 <section id="projects">
-  <div class="sec-head">
-    <span class="sec-title">// Public Tools</span>
-    <a href="https://github.com/00xAuto" style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:0.08em;" target="_blank">github.com/00xAuto →</a>
+  <h2>Tools — <a href="https://github.com/00xAuto" target="_blank">github.com/00xAuto</a></h2>
+  <ul class="proj-list">
+    <li class="proj-item">
+      <div class="proj-header"><a href="https://github.com/00xAuto/Nemesis-AV-bypass-shell" target="_blank" class="proj-name">Nemesis AV-Bypass Shell</a><span class="proj-tech">C · AV Evasion · Winsock</span></div>
+      <div class="proj-desc">Windows reverse shell with XOR-obfuscated C2 config. IP never stored in plaintext — encrypted at build time, decrypted into a stack buffer then zeroed before <code>connect()</code>. No console window, stripped symbols, small binary footprint.</div>
+    </li>
+    <li class="proj-item">
+      <div class="proj-header"><a href="https://github.com/00xAuto/UUIDFuscation-Loader" target="_blank" class="proj-name">UUIDFuscation Loader</a><span class="proj-tech">C · Shellcode Loader · Static AV Evasion</span></div>
+      <div class="proj-desc">Shellcode encoded as UUID strings, decoded at runtime with <code>UuidFromStringA</code>, executed from a heap-allocated RX region. Evades static AV signatures scanning for raw shellcode bytes in PE sections.</div>
+    </li>
+    <li class="proj-item">
+      <div class="proj-header"><a href="https://github.com/00xAuto/Special-ODT-Macro-RCE" target="_blank" class="proj-name">Special ODT Macro RCE</a><span class="proj-tech">Python · RCE · LibreOffice</span></div>
+      <div class="proj-desc">Generates malicious <code>.odt</code> files that fire a payload on open in LibreOffice. Dual-mode: reverse shell via <code>dom:load</code> macro event, or NTLM hash capture via embedded UNC path reference.</div>
+    </li>
+    <li class="proj-item">
+      <div class="proj-header"><a href="https://github.com/00xAuto/Minion-HTB-Pwner-Script" target="_blank" class="proj-name">Minion HTB Auto-Pwn</a><span class="proj-tech">Python · ICMP Shell · Scapy</span></div>
+      <div class="proj-desc">Full automated exploit chain for HTB: Minion (Insane/Windows). All TCP/UDP blocked — data exfiltrated over ICMP only using <code>PowerShell Ping.Send()</code> and Scapy sniffing. Interactive admin shell in pure ICMP.</div>
+    </li>
+    <li class="proj-item">
+      <div class="proj-header"><a href="https://github.com/00xAuto/IMAP-Mailbox-Dumper" target="_blank" class="proj-name">IMAP Mailbox Dumper</a><span class="proj-tech">Python · Post-Exploitation · IMAP</span></div>
+      <div class="proj-desc">Dumps every IMAP folder — headers and full body — to stdout post-credential-spray. SSL support, per-folder error handling, binary-attachment safe.</div>
+    </li>
+    <li class="proj-item">
+      <div class="proj-header"><a href="https://github.com/00xAuto/Microsoft-SQL-SID-bruteforce" target="_blank" class="proj-name">Windows SID Parser</a><span class="proj-tech">Python · AD Enumeration · LDAP</span></div>
+      <div class="proj-desc">Parses raw Windows SID bytes into human-readable SID strings. Decodes all sub-authorities. Useful during AD enumeration, LDAP/LDIF analysis, and memory forensics.</div>
+    </li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="htb">
+  <h2>HackTheBox</h2>
+  <div class="stat-grid">
+    <div class="stat-cell"><div class="stat-label">Rank</div><div class="stat-val">Grandmaster</div></div>
+    <div class="stat-cell"><div class="stat-label">Machines Owned</div><div class="stat-val">217<em>+</em></div></div>
+    <div class="stat-cell"><div class="stat-label">Weekly Streak</div><div class="stat-val">24<em>wks</em></div></div>
   </div>
-
-  <div class="proj-grid">
-    <div class="proj-card">
-      <div class="proj-cat">AV Evasion · C</div>
-      <div class="proj-name">Nemesis AV-Bypass Shell</div>
-      <div class="proj-desc">Windows reverse shell with XOR-obfuscated C2 config. IP never stored in plaintext — encrypted at build time, decrypted into a stack buffer then zeroed before connect(). No console, stripped symbols.</div>
-      <div class="proj-footer">
-        <div class="proj-tags"><span class="ptag tool">C</span><span class="ptag tool">AV Evasion</span><span class="ptag">Winsock</span></div>
-        <a href="https://github.com/00xAuto/Nemesis-AV-bypass-shell" target="_blank" class="proj-link">GitHub →</a>
-      </div>
-    </div>
-
-    <div class="proj-card">
-      <div class="proj-cat">Shellcode Loader · C</div>
-      <div class="proj-name">UUIDFuscation Loader</div>
-      <div class="proj-desc">Shellcode loader using UUID string obfuscation to evade static AV. Shellcode encoded as UUID strings, decoded at runtime with UuidFromStringA, executed in a heap-allocated RX region.</div>
-      <div class="proj-footer">
-        <div class="proj-tags"><span class="ptag tool">C</span><span class="ptag tool">UUID</span><span class="ptag">Shellcode</span></div>
-        <a href="https://github.com/00xAuto/UUIDFuscation-Loader" target="_blank" class="proj-link">GitHub →</a>
-      </div>
-    </div>
-
-    <div class="proj-card">
-      <div class="proj-cat">RCE · Python</div>
-      <div class="proj-name">Special ODT Macro RCE</div>
-      <div class="proj-desc">Generates malicious .odt files that fire a payload on open in LibreOffice. Dual-mode: reverse shell via dom:load macro event, or NTLM hash capture via embedded UNC path.</div>
-      <div class="proj-footer">
-        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">RCE</span><span class="ptag">LibreOffice</span></div>
-        <a href="https://github.com/00xAuto/Special-ODT-Macro-RCE" target="_blank" class="proj-link">GitHub →</a>
-      </div>
-    </div>
-
-    <div class="proj-card">
-      <div class="proj-cat">ICMP Shell · Python</div>
-      <div class="proj-name">Minion HTB Auto-Pwn</div>
-      <div class="proj-desc">Full automated exploit chain for HTB: Minion (Insane/Windows). Data exfil over ICMP only — firewall drops all TCP/UDP. Interactive admin shell via PowerShell Ping.Send() and Scapy sniffing.</div>
-      <div class="proj-footer">
-        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">ICMP</span><span class="ptag">Scapy</span></div>
-        <a href="https://github.com/00xAuto/Minion-HTB-Pwner-Script" target="_blank" class="proj-link">GitHub →</a>
-      </div>
-    </div>
-
-    <div class="proj-card">
-      <div class="proj-cat">Post-Exploitation · Python</div>
-      <div class="proj-name">IMAP Mailbox Dumper</div>
-      <div class="proj-desc">Dumps every IMAP folder — headers and full body — to stdout. Useful post-credential-spray on internal mail servers. SSL support, per-folder error handling, binary attachment safe.</div>
-      <div class="proj-footer">
-        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">IMAP</span><span class="ptag">Post-Exploit</span></div>
-        <a href="https://github.com/00xAuto/IMAP-Mailbox-Dumper" target="_blank" class="proj-link">GitHub →</a>
-      </div>
-    </div>
-
-    <div class="proj-card">
-      <div class="proj-cat">AD Enumeration · Python</div>
-      <div class="proj-name">Windows SID Parser</div>
-      <div class="proj-desc">Parses raw Windows Security Identifier bytes into human-readable SID strings. Useful during AD enumeration, LDAP/LDIF analysis, and memory forensics. Decodes all sub-authorities.</div>
-      <div class="proj-footer">
-        <div class="proj-tags"><span class="ptag tool">Python</span><span class="ptag tool">SID</span><span class="ptag">AD</span></div>
-        <a href="https://github.com/00xAuto/Microsoft-SQL-SID-bruteforce" target="_blank" class="proj-link">GitHub →</a>
-      </div>
-    </div>
+  <p style="font-size:12px;margin-bottom:22px;"><a href="https://app.hackthebox.com/users/1018606" target="_blank">hackthebox.com/users/0xAut0</a></p>
+  <div class="season-label">Season results</div>
+  <div class="s-btns">
+    <button class="s-btn on" id="btn-s10" onclick="setSeason(10)">s10</button>
+    <button class="s-btn"    id="btn-s11" onclick="setSeason(11)">s11</button>
+  </div>
+  <table class="season-table">
+    <thead><tr><th>Stat</th><th>Value</th></tr></thead>
+    <tbody id="season-body"></tbody>
+  </table>
+  <button class="machines-toggle" onclick="toggleMachines()">show notable machines ↓</button>
+  <div id="machines-table" class="hidden">
+    <table class="machine-table" style="margin-top:12px">
+      <thead><tr><th>Machine</th><th>OS</th><th>Diff</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Minion</td><td class="os">Windows</td><td class="diff-insane">Insane</td><td style="font-size:11px;color:var(--muted)">Auto-pwn script — ICMP-only shell</td></tr>
+        <tr><td>FormulaX</td><td class="os">Linux</td><td class="diff-hard">Hard</td><td style="font-size:11px;color:var(--muted)">SSTI via headless browser, XSS to RCE</td></tr>
+        <tr><td>Analysis</td><td class="os">Windows</td><td class="diff-hard">Hard</td><td style="font-size:11px;color:var(--muted)">LDAP injection, DLL hijack LPE</td></tr>
+        <tr><td>Office</td><td class="os">Windows</td><td class="diff-hard">Hard</td><td style="font-size:11px;color:var(--muted)">LibreOffice macro RCE, Kerberoasting</td></tr>
+        <tr><td>Monitored</td><td class="os">Linux</td><td class="diff-hard">Hard</td><td style="font-size:11px;color:var(--muted)">Nagios XI CVE chain</td></tr>
+        <tr><td>WifineticTwo</td><td class="os">Linux</td><td class="diff-insane">Insane</td><td style="font-size:11px;color:var(--muted)">OpenWRT pivot, WPS Pixie-Dust</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
+<hr>
 
+<section id="certs">
+  <h2>Certifications</h2>
+  <ul class="cert-list">
+    <li class="cert-item"><span class="cert-name">OSCP+</span><span class="cert-info">Offensive Security · 2026</span></li>
+  </ul>
+  <p style="font-size:12px;color:var(--muted);margin-top:14px;">
+    In progress: <a href="https://www.offsec.com/courses/exp-301/" target="_blank">Mystry...</a>"Advanced" Exploit Development
+  </p>
+</section>
 
-<!-- CONTACT -->
+<hr>
+
 <section id="contact">
-  <div class="contact-grid">
-    <div class="contact-left">
-      <div class="contact-h">Get in<br><em>touch.</em></div>
-      <br>
-      <p class="contact-sub">Open to vuln research collabs, red team roles, and conversations about Windows internals, exploit dev, or kernel security.</p>
-    </div>
-    <div class="contact-links">
-      <a href="https://github.com/00xAuto" target="_blank" class="c-link">
-        <span>github.com/00xAuto</span><span class="c-link-arrow">→</span>
-      </a>
-      <a href="https://app.hackthebox.com/users/1018606" target="_blank" class="c-link">
-        <span>hackthebox.com/users/0xAut0</span><span class="c-link-arrow">→</span>
-      </a>
-      <a href="mailto:00xauto@gmail.com" class="c-link">
-        <span>00xauto@gmail.com</span><span class="c-link-arrow">→</span>
-      </a>
-    </div>
-  </div>
+  <h2>Contact</h2>
+  <p>Open to vulnerability research collaborations, red team roles, and conversations about Windows internals, exploit development, and kernel security.</p>
+  <ul class="contact-list">
+    <li><a href="mailto:00xauto@gmail.com">00xauto@gmail.com</a></li>
+    <li><a href="https://github.com/00xAuto" target="_blank">github.com/00xAuto</a></li>
+    <li><a href="https://app.hackthebox.com/users/1018606" target="_blank">hackthebox.com/users/0xAut0</a></li>
+  </ul>
 </section>
 
-<footer>
-  <span>00xAuto · Exploit Dev · Vuln Research</span>
+<footer class="site-footer">
+  <span>00xAuto · exploit dev · vuln research</span>
   <span>OSCP+ · Grandmaster · 2026</span>
 </footer>
+</div>
 
 <script>
-  // Season toggle
-  const SD = {
-    10: { rank:'#116', tier:'Holo Tier · S10', pts:'825', flags:'Flags: 26/26' },
-    11: { rank:'#252', tier:'Silver Tier · S11', pts:'110', flags:'Flags: 4/24' }
-  };
-  function setSeason(n) {
-    const d = SD[n];
-    document.getElementById('s-rank').textContent = d.rank;
-    document.getElementById('s-tier').textContent = d.tier;
-    document.getElementById('s-pts').textContent  = d.pts;
-    document.getElementById('s-flags').textContent = d.flags;
-    document.getElementById('btn-s10').className = 's-btn' + (n===10?' on':'');
-    document.getElementById('btn-s11').className = 's-btn' + (n===11?' on':'');
+/* ── Blog filter ── */
+function filterPosts(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['#post-list .post-item','#coming-list .coming-item'].forEach(sel =>
+    document.querySelectorAll(sel).forEach(r => {
+      r.style.display = (cat !== 'all' && r.dataset.cat !== cat) ? 'none' : '';
+    })
+  );
+}
+
+/* ── HTB ── */
+const seasons = {
+  10:[['Rank','#116'],['Tier','Holo Tier'],['Points','825'],['Flags','26 / 26']],
+  11:[['Rank','#252'],['Tier','Silver Tier'],['Points','110'],['Flags','4 / 24']]
+};
+function setSeason(n) {
+  document.getElementById('season-body').innerHTML =
+    seasons[n].map(([k,v])=>`<tr><td class="k">${k}</td><td class="v">${v}</td></tr>`).join('');
+  document.getElementById('btn-s10').className='s-btn'+(n===10?' on':'');
+  document.getElementById('btn-s11').className='s-btn'+(n===11?' on':'');
+}
+setSeason(10);
+
+function toggleMachines() {
+  const el=document.getElementById('machines-table'),btn=document.querySelector('.machines-toggle');
+  btn.textContent=el.classList.toggle('hidden')?'show notable machines ↓':'hide machines ↑';
+}
+
+/* ── Nav highlight ── */
+const _s=document.querySelectorAll('section[id]'),_n=document.querySelectorAll('.site-nav a');
+let _t=false;
+window.addEventListener('scroll',()=>{
+  if(_t)return;_t=true;
+  requestAnimationFrame(()=>{
+    let c='';_s.forEach(s=>{if(window.scrollY>=s.offsetTop-130)c=s.id;});
+    _n.forEach(a=>{a.style.color=a.getAttribute('href')==='#'+c?'var(--accent)':'';});
+    _t=false;
+  });
+},{passive:true});
+
+/* ══════════════════════════════════════════════════════════════════════
+   ENTITY ART + CHROMATIC GLITCH
+   ══════════════════════════════════════════════════════════════════════
+   Entity is drawn in VERY dark tones — barely above background level.
+   At rest it's an almost-invisible shadow in the viewport margins.
+   Mouse movement separates the R / G / B channels via CSS transforms,
+   creating subtle chromatic fringing around the dark ink shapes.
+   Speed & direction determine the fringe magnitude and axis.           */
+(function () {
+  'use strict';
+
+  const bgR = document.getElementById('bg-r');
+  const bgG = document.getElementById('bg-g');
+  const bgB = document.getElementById('bg-b');
+  const sl  = document.getElementById('scanlines');
+
+  /* ── Seeded PRNG ── */
+  function mkRNG(seed) {
+    let s = seed >>> 0;
+    return () => { s=(Math.imul(s,1664525)+1013904223)>>>0; return s/0xFFFFFFFF; };
   }
 
-  // Blog category filter
-  function filterPosts(cat, btn) {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.post-row, .coming-soon-row').forEach(row => {
-      row.style.display = (cat === 'all' || row.dataset.cat === cat) ? '' : 'none';
+  let W, H;
+  const src = document.createElement('canvas');
+  let   srcCtx;
+
+  /* ══════════════════════════════════════════════════════════════════
+     ART — dark ink entity, deliberately muted.
+     Wing fills: ~8–14 units above background (#070709 ≈ rgb 7,7,9).
+     Crown / face kept slightly brighter as focal anchor points.
+     The THREE-CANVAS system amplifies these subtle differences into
+     visible coloured halos only when channels are separated.           */
+  function drawArt(ctx, w, h) {
+    const r  = mkRNG(0xDEADC0DE);
+    const cx = w * .5, cy = h * .5, sc = Math.min(w,h) * .38;
+
+    /* ── solid background ── */
+    ctx.fillStyle = '#070709';
+    ctx.fillRect(0, 0, w, h);
+
+    /* ── barely-there atmospheric centre glow ── */
+    const haze = ctx.createRadialGradient(cx, cy, 0, cx, cy, sc * 1.05);
+    haze.addColorStop(0,   'rgba(20,10,38,.14)');
+    haze.addColorStop(.55, 'rgba(10,5,20,.06)');
+    haze.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = haze; ctx.fillRect(0, 0, w, h);
+
+    /* ── wings ── */
+    _wing(ctx, cx, cy, sc, -1, r);
+    _wing(ctx, cx, cy, sc,  1, r);
+
+    /* ── dark body void + tendrils ── */
+    _body(ctx, cx, cy, sc, r);
+
+    /* ── crown ── */
+    _crown(ctx, cx, cy, sc, r);
+
+    /* ── pixel face — brighter so it shows clearly in the glitch ── */
+    _face(ctx, cx, cy - sc * .04, sc, r);
+
+    /* ── vignette ── */
+    const vg = ctx.createRadialGradient(cx, cy, sc * .35, cx, cy, Math.max(w,h) * .82);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.95)');
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
+  }
+
+  /* Wing — very dark fills, barely lighter than bg */
+  function _wing(ctx, cx, cy, sc, dir, r) {
+    const ox = cx + dir * sc * .07, oy = cy + sc * .10;
+    const j  = () => (r() - .5) * sc * .12;
+
+    /* Layered bezier fills — colour chosen to be ~10–18 units above bg */
+    for (let p = 0; p < 16; p++) {
+      const a = .022 + p * .022;           /* max accumulated ~.37  */
+      ctx.beginPath(); ctx.moveTo(ox, oy);
+      ctx.bezierCurveTo(
+        cx+dir*sc*(.20+r()*.18)+j(), cy-sc*(.05+r()*.13)+j(),
+        cx+dir*sc*(.80+r()*.25)+j()*.5, cy-sc*(r()*.05)+j()*.5,
+        cx+dir*sc*(1.28+r()*.24), cy+sc*(.06+r()*.12)
+      );
+      ctx.bezierCurveTo(
+        cx+dir*sc*(1.02+r()*.18)+j()*.5, cy+sc*(.28+r()*.12)+j()*.5,
+        cx+dir*sc*(.30+r()*.14)+j(), cy+sc*(.34+r()*.08)+j(),
+        ox, oy + sc * .07
+      );
+      /* Very dark purple — barely above background */
+      ctx.fillStyle = `rgba(18,14,32,${a})`;
+      ctx.fill();
+    }
+
+    /* Fine feather strokes — slightly brighter for structural detail */
+    for (let i = 0; i < 30; i++) {
+      const t   = i / 30;
+      const bx  = ox + dir * sc * t * 1.10;
+      const by  = oy + (r()-.5) * sc * .07;
+      const ang = (dir===-1 ? Math.PI : 0) + (dir===-1 ? t*.52 : -t*.52) + (r()-.5)*.48;
+      const fl  = sc * (.22 + r()*.44) * (.50 + t*.50);
+      const tipx = bx + Math.cos(ang) * fl;
+      const tipy = by + Math.sin(ang) * fl * .46;
+      ctx.beginPath(); ctx.moveTo(bx, by);
+      ctx.quadraticCurveTo(
+        bx + Math.cos(ang+dir*.18)*fl*.52 + (r()-.5)*sc*.05,
+        by + Math.sin(ang+dir*.18)*fl*.52,
+        tipx, tipy
+      );
+      /* Still dark — strokes are 12–24 units above bg */
+      ctx.strokeStyle = `rgba(24,19,44,${.18+r()*.42})`;
+      ctx.lineWidth   = .4 + r() * 2.0; ctx.stroke();
+    }
+
+    /* Micro ink scatter — ultra-subtle texture */
+    for (let i = 0; i < 200; i++) {
+      const ang = r() * Math.PI * 2;
+      const d   = Math.pow(r(), .55) * sc * 1.30;
+      const px  = ox + Math.cos(ang) * d * (dir===-1 ? -.60 : .60);
+      const py  = oy + Math.sin(ang) * d * .30;
+      ctx.beginPath(); ctx.arc(px, py, r() * 1.2, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(16,12,28,${r()*.13})`; ctx.fill();
+    }
+  }
+
+  /* Body void — deepest dark, with faint tendrils */
+  function _body(ctx, cx, cy, sc, r) {
+    const g = ctx.createRadialGradient(cx,cy,0, cx,cy,sc*.58);
+    g.addColorStop(0,   'rgba(0,0,0,.98)');
+    g.addColorStop(.30, 'rgba(0,0,0,.82)');
+    g.addColorStop(.68, 'rgba(0,0,0,.30)');
+    g.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(cx-sc, cy-sc, sc*2, sc*2);
+
+    /* Tendrils — slightly brighter than wings for organic feel */
+    for (let i = 0; i < 48; i++) {
+      const ang = r() * Math.PI * 2;
+      const len = sc * (.06 + r() * .32);
+      const ex  = cx + Math.cos(ang) * len;
+      const ey  = cy + Math.sin(ang) * len * .86;
+      const cpx = cx + Math.cos(ang+(r()-.5)*1.3)*len*.46;
+      const cpy = cy + Math.sin(ang+(r()-.5)*1.3)*len*.46;
+      ctx.beginPath();
+      ctx.moveTo(cx+(r()-.5)*6, cy+(r()-.5)*6);
+      ctx.quadraticCurveTo(cpx,cpy,ex,ey);
+      ctx.strokeStyle = `rgba(22,17,40,${.16+r()*.46})`;
+      ctx.lineWidth   = .4 + r() * 2.4; ctx.stroke();
+    }
+  }
+
+  /* Crown — slightly more visible; provides the "spike" silhouette */
+  function _crown(ctx, cx, cy, sc, r) {
+    const baseY = cy - sc * .17;
+    const n     = 7 + Math.floor(r() * 4);
+    for (let i = 0; i < n; i++) {
+      const t    = (i/(n-1)) - .5;
+      const bx   = cx + t * sc * .50, by = baseY;
+      const hLen = sc * (.24 + r() * .60);
+      const tx   = bx + t*sc*.28 + (r()-.5)*sc*.13, ty = by - hLen;
+      ctx.beginPath(); ctx.moveTo(bx, by);
+      ctx.quadraticCurveTo((bx+tx)/2+(r()-.5)*sc*.12, (by+ty)/2, tx, ty);
+      /* Slightly brighter than wing — crown is the clearest landmark */
+      ctx.strokeStyle = `rgba(34,28,60,${.38+r()*.44})`;
+      ctx.lineWidth   = .5 + r() * 2.0; ctx.stroke();
+      for (let j = 0; j < 2; j++) {
+        const bt  = .25 + r()*.55;
+        const brx = bx+(tx-bx)*bt, bry = by+(ty-by)*bt;
+        const brl = hLen*(.12+r()*.24);
+        const bra = -Math.PI/2 + (r()-.5)*Math.PI*.9;
+        ctx.beginPath(); ctx.moveTo(brx, bry);
+        ctx.lineTo(brx+Math.cos(bra)*brl, bry+Math.sin(bra)*brl*.68);
+        ctx.strokeStyle = `rgba(28,22,50,${.22+r()*.30})`;
+        ctx.lineWidth   = .3 + r() * .85; ctx.stroke();
+      }
+    }
+  }
+
+  /* Pixel face — kept bright; it's the focal point that pops in the glitch */
+  function _face(ctx, cx, cy, sc, r) {
+    const ps = Math.max(4, sc * .032);
+    [[-2,-1],[2,-1],[-1,-1],[1,-1],[0,-1],
+     [-2, 1],[-1, 1],[0, 1],[1, 1],[2, 1],
+     [-1, 2],[0, 2],[1, 2]
+    ].forEach(([x,y]) => {
+      const b = 95 + Math.floor(r() * 90);
+      ctx.fillStyle = `rgb(${b},${b-5},${b+12})`;
+      ctx.fillRect(cx+x*ps-ps/2, cy+y*ps-ps/2, ps-.5, ps-.5);
     });
   }
 
-  // Nav active
-  const secs = document.querySelectorAll('section[id]');
-  const links = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', () => {
-    let cur = '';
-    secs.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
-    links.forEach(a => { a.style.color = a.getAttribute('href') === '#'+cur ? 'var(--bright)' : ''; });
-  });
+  /* ── Channel extraction (once per resize) ── */
+  function extractCh(srcCtx, dstCtx, ch, w, h) {
+    const sd = srcCtx.getImageData(0, 0, w, h);
+    const s  = sd.data;
+    const od = new ImageData(w, h);
+    const o  = od.data;
+    for (let i = 0; i < s.length; i += 4) {
+      o[i]   = ch===0 ? s[i]   : 0;
+      o[i+1] = ch===1 ? s[i+1] : 0;
+      o[i+2] = ch===2 ? s[i+2] : 0;
+      o[i+3] = 255;      /* opaque — screen blend needs this */
+    }
+    dstCtx.putImageData(od, 0, 0);
+  }
+
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    [bgR, bgG, bgB, src].forEach(c => { c.width=W; c.height=H; });
+    srcCtx = src.getContext('2d');
+    drawArt(srcCtx, W, H);
+    extractCh(srcCtx, bgR.getContext('2d'), 0, W, H);
+    extractCh(srcCtx, bgG.getContext('2d'), 1, W, H);
+    extractCh(srcCtx, bgB.getContext('2d'), 2, W, H);
+  }
+
+  let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT=setTimeout(resize,220); });
+
+  /* ── Mouse velocity ── */
+  let rawVX=0, rawVY=0, curVX=0, curVY=0;
+  let prevX=-1, prevY=-1, idleT=null;
+
+  function onMove(cx, cy) {
+    if (prevX >= 0) { rawVX = cx-prevX; rawVY = cy-prevY; }
+    prevX=cx; prevY=cy;
+    sl.classList.add('hot');
+    clearTimeout(idleT);
+    idleT = setTimeout(() => { rawVX=0; rawVY=0; sl.classList.remove('hot'); }, 200);
+  }
+  document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+  document.addEventListener('touchmove', e => { const t=e.touches[0]; onMove(t.clientX,t.clientY); }, {passive:true});
+
+  /* ── Animation ── */
+  function loop() {
+    /* Smooth lerp */
+    curVX += (rawVX - curVX) * .20;
+    curVY += (rawVY - curVY) * .20;
+    rawVX *= .75; rawVY *= .75;
+
+    const speed = Math.sqrt(curVX*curVX + curVY*curVY);
+
+    if (speed > .8) {
+      const ang   = Math.atan2(curVY, curVX);
+      const nx    = curVX/speed, ny = curVY/speed;
+
+      /* ── Perpendicular spread ──────────────────────────────────────
+         R and B shift orthogonal to movement direction.
+         → Moving UP   = horizontal colour fringe (cyan·red split)
+         → Moving DOWN = horizontal fringe reversed + downward drift
+         → Moving sideways = vertical fringe
+         Up-movement gets a mild boost for that "explosion" feel.       */
+      const perpAng    = ang + Math.PI * .5;
+      const upBoost    = curVY < 0 ? 1.35 : 1.0;
+
+      /* ── CAPPED at 24 px — keeps effect tasteful, not garish ── */
+      const spread = Math.min(speed * 1.6 * upBoost, 24);
+
+      const rX = Math.cos(perpAng) * spread;
+      const rY = Math.sin(perpAng) * spread;
+
+      /* Green follows cursor — creates the drag / trail feeling */
+      const gDrag = Math.min(speed * .55, 8);
+
+      bgR.style.transform = `translate(${rX.toFixed(1)}px,${rY.toFixed(1)}px)`;
+      bgG.style.transform = `translate(${(nx*gDrag).toFixed(1)}px,${(ny*gDrag).toFixed(1)}px)`;
+      bgB.style.transform = `translate(${(-rX).toFixed(1)}px,${(-rY).toFixed(1)}px)`;
+    } else {
+      bgR.style.transform = bgG.style.transform = bgB.style.transform = 'translate(0px,0px)';
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  /* ── Rare autonomous glitch — entity briefly "wakes" ── */
+  function autoBurst() {
+    setTimeout(() => {
+      rawVX = (Math.random()-.5) * 30;
+      rawVY = -(25 + Math.random()*25);  /* upward = horizontal fringe */
+      setTimeout(() => { rawVX=0; rawVY=0; }, 180);
+      autoBurst();
+    }, 12000 + Math.random()*24000);     /* every 12–36 s */
+  }
+
+  resize();
+  loop();
+  autoBurst();
+})();
 </script>
 </body>
 </html>
