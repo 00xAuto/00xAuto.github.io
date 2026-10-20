@@ -256,6 +256,13 @@ html, body, .page, .page * {
   <h2>Research</h2>
   <ul class="research-list">
     <li class="research-item">
+      <a href="https://github.com/00xAuto/Capcom.sys-Full-Documentation" class="research-title">
+        Capcom.sys — CVE-2016-7255: Signed Driver Abuse <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
+      </a>
+      <div class="research-desc">Vulnerable signed driver exploitation. IOCTL interface abuse to execute attacker-supplied
+      shellcode with SMEP disabled via <code>CR4</code> manipulation. Full user-mode to kernel code execution, shellcode relay, clean CPU state restore.</div>
+    </li>
+    <li class="research-item">
       <a href="https://github.com/00xAuto/HEVD-Write-What-Where" target="_blank" class="research-title">
         HEVD — Write What Where (WWW) → Local Privilege Escalation <span class="tag kernel">Kernel</span>
       </a>
@@ -265,17 +272,11 @@ html, body, .page, .page * {
     </li>
     <li class="research-item">
       <a href="https://github.com/00xAuto/Trick-Or-Deal---HTB" target="_blank" class="research-title">
-        Trick OR Deal — Use After Free: tcache Poisoning to RCE <span class="tag heap">Heap</span>
+        Trick OR Deal — Use After Free: <span class="tag heap">Heap</span>
       </a>
-      <div class="research-desc">"Trick Or Deal" PWN challenge. Controlled <code>free()</code> a straight forward Heap exploitation challenge featuring a UAF (Use-After-Free) vulnerability in menu provided in the binary.</div>
+      <div class="post-summary">HTB pwn Heap challenge featuring a "Use-After-Free" vulnerabiltiy.</div>
     </li>
-    <li class="research-item">
-      <a href="https://github.com/00xAuto/Capcom.sys-Full-Documentation" class="research-title">
-        Capcom.sys — CVE-2016-7255: Signed Driver Abuse <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
-      </a>
-      <div class="research-desc">Vulnerable signed driver exploitation. IOCTL interface abuse to execute attacker-supplied
-      shellcode with SMEP disabled via <code>CR4</code> manipulation. Full user-mode to kernel code execution, shellcode relay, clean CPU state restore.</div>
-    </li>
+
   </ul>
 </section>
 
@@ -293,6 +294,13 @@ html, body, .page, .page * {
     <li class="post-item" data-cat="kernel">
       <div class="post-meta">2026 · kernel</div>
       <div class="post-body">
+        <a class="post-link" href="https://github.com/00xAuto/Capcom.sys-Full-Documentation">Capcom.sys — CVE-2016-7255: SMEP Bypass &amp; Kernel Exec</a>
+        <div class="post-summary">IOCTL abuse on signed vulnerable driver, CR4 manipulation to disable SMEP, arbitrary kernel code execution from user mode.</div>
+      </div>
+    </li>
+    <li class="post-item" data-cat="kernel">
+      <div class="post-meta">2026 · kernel</div>
+      <div class="post-body">
         <a class="post-link" href="https://github.com/00xAuto/HEVD-Write-What-Where" target="_blank">HEVD — Write What Where: Arbitrary Kernel Write to LPE</a>
         <div class="post-summary">HalDispatchTable overwrite via WWW primitive. NtQueryIntervalProfile trigger, token-stealing shellcode, Windows 10 LPE chain.</div>
       </div>
@@ -300,16 +308,15 @@ html, body, .page, .page * {
     <li class="post-item" data-cat="heap">
       <div class="post-meta">2026 · heap</div>
       <div class="post-body">
-        <a class="post-link" href="https://github.com/00xAuto/Trick-Or-Deal---HTB" target="_blank">Trick OR Deal — UAF: tcache Poisoning to RCE</a>
-        <div class="post-summary">CTF PWN. UAF → tcache poison → <code>__free_hook</code> overwrite → shell. glibc 2.31 internals and safe-linking bypass.</div>
+        <a class="post-link" href="https://github.com/00xAuto/Trick-Or-Deal---HTB" target="_blank">Trick OR Deal — UAF: </a>
+        <div class="post-summary">HTB pwn Heap challenge featuring a "Use-After-Free" vulnerabiltiy.</div>
       </div>
     </li>
-    <li class="post-item" data-cat="kernel">
-      <div class="post-meta">2026 · kernel</div>
-      <div class="post-body">
-        <a class="post-link" href="https://github.com/00xAuto/Capcom.sys-Full-Documentation">Capcom.sys — CVE-2016-7255: SMEP Bypass &amp; Kernel Exec</a>
-        <div class="post-summary">IOCTL abuse on signed vulnerable driver, CR4 manipulation to disable SMEP, arbitrary kernel code execution from user mode.</div>
-      </div>
+    <li class="research-item">
+      <a href="https://github.com/00xAuto/Protostar-Heap-Level-0" class="research-title">
+        Protostar Heap level 0 : Heap-based Buffer Overflow vulnerability <span class="tag cve">CVE</span><span class="tag kernel">Heap</span>
+      </a>
+      <div class="research-desc">A basic and easy heap exploitation challenge featuring a Heap buffer overflow by overwriting a memory address to the "winner" function address with PIE disabled.</div>
     </li>
   </ul>
   <div class="coming-section">
