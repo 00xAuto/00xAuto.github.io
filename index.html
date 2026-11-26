@@ -253,11 +253,17 @@ html, body, .page, .page * {
 <hr>
 
 <section id="research">
-  <h2>Research</h2>
+  <h2>Latest research</h2>
   <ul class="research-list">
     <li class="research-item">
+      <a href="https://github.com/00xAuto/dbutil-2-3-CVE-2021-21551-Documentation" target="_blank" class="research-title">
+        dbutil_2_3.sys CVE-2021-21551 <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
+      </a>
+      <div class="research-desc">A driver that had a vuln for 11 years (since 2009), which takes unchecked user input and passes it into memmove, leading to EoP. I covered the Data-only attack in this one.</div>
+    </li>
+    <li class="research-item">
       <a href="https://github.com/00xAuto/Capcom.sys-Full-Documentation" target="_blank" class="research-title">
-        Capcom.sys — CVE-2016-7255: Signed Driver Abuse <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
+        Capcom.sys - CVE-2016-7255: Signed Driver Abuse <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
       </a>
       <div class="research-desc">Vulnerable signed driver exploitation. IOCTL interface abuse to execute attacker-supplied
       shellcode with SMEP disabled via <code>CR4</code> manipulation. Full user-mode to kernel code execution, shellcode relay, clean CPU state restore.</div>
@@ -300,6 +306,13 @@ html, body, .page, .page * {
     <li class="post-item" data-cat="kernel">
       <div class="post-meta">2026 · kernel</div>
       <div class="post-body">
+        <a class="post-link" href="https://github.com/00xAuto/dbutil-2-3-CVE-2021-21551-Documentation">dbutil_2_3.sys CVE-2021-21551 : Memmove.</a>
+        <div class="post-summary">A driver that had a vuln for 11 years (since 2009), which takes unchecked user input and passes it into memmove, leading to EoP. I covered the Data-only attack in this one.</div>
+      </div>
+    </li>
+    <li class="post-item" data-cat="kernel">
+      <div class="post-meta">2026 · kernel</div>
+      <div class="post-body">
         <a class="post-link" href="https://github.com/00xAuto/Capcom.sys-Full-Documentation">Capcom.sys — CVE-2016-7255: SMEP Bypass</a>
         <div class="post-summary">IOCTL abuse on signed vulnerable driver, CR4 manipulation to disable SMEP, arbitrary kernel code execution from user mode.</div>
       </div>
@@ -325,21 +338,19 @@ html, body, .page, .page * {
         <div class="post-summary">HTB pwn Heap challenge featuring a "Use-After-Free" vulnerabiltiy.</div>
       </div>
     </li>
-    <li class="post-item" data-cat="heap">
+    <li class="post-item" data-cat="stack">
       <div class="post-meta">2026 · Stack</div>
       <div class="post-body">
         <a class="post-link" href="https://github.com/00xAuto/Vulnserver-TRUN-ReverseShell" target="_blank">Vulnserver - TRUN </a>
         <div class="post-summary">Open source challenge aimed at learning how to exploit a windows binary using Windbg and python remotely (via an open port).</div>
       </div>
     </li>
-    <li class="research-item" data-cat="heap">
-      <div class="post-meta">2026 · heap</div>
+    <li class="post-item" data-cat="heap">
+      <div class="post-meta">2026 · kernel</div>
       <div class="post-body">
-      <a class="post-link" href="https://github.com/00xAuto/Protostar-Heap-Level-0" target="_blank">
-        Protostar Heap level 0 : Heap-based Buffer Overflow vulnerability <span class="tag kernel">Heap</span>
-      </a>
-      <div class="post-summary">A basic and easy heap exploitation challenge featuring a Heap buffer overflow by overwriting a memory address to the "winner" function address with PIE disabled.</div>
-    </div>
+        <a class="post-link" href="https://github.com/00xAuto/Protostar-Heap-Level-0">Protostar Heap level 0 : Heap-based Buffer Overflow vulnerability</a>
+        <div class="post-summary">A basic and easy heap exploitation challenge featuring a Heap buffer overflow by overwriting a memory address to the "winner" function address with PIE disabled.</div>
+      </div>
     </li>
   </ul>
   <div class="coming-section">
