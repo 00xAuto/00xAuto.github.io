@@ -254,6 +254,12 @@ html, body, .page, .page * {
 <section id="research">
   <h2>Latest research</h2>
   <ul class="research-list">
+     <li class="research-item">
+      <a href="https://github.com/00xAuto/FortiShield.sys-Full-Documentation-CVE-2015-5736" target="_blank" class="research-title">
+        FortiShield.sys : CVE-2015-5736 <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
+      </a>
+      <div class="research-desc">A driver that had a really interesting vuln, It takes user input and then calls it. But it does require some understanding which i attempted to cover this one.</div>
+    </li>
     <li class="research-item">
       <a href="https://github.com/00xAuto/dbutil-2-3-CVE-2021-21551-Documentation" target="_blank" class="research-title">
         dbutil_2_3.sys CVE-2021-21551 <span class="tag cve">CVE</span><span class="tag kernel">Kernel</span>
@@ -281,12 +287,6 @@ html, body, .page, .page * {
       </a>
       <div class="research-desc">A demonstration of how easy it is to escalate permissions with a UAF vulnerability. In this case, we are spraying the kernel heap (kernel pool).</div>
     </li>
-    <li class="research-item">
-      <a href="https://github.com/00xAuto/Vulnserver-TRUN-ReverseShell" target="_blank" class="research-title">
-        Vulnserver : Stack buffer overflow to RCE <span class="tag heap">Stack</span>
-      </a>
-      <div class="post-summary">An open source Windows exploitation prep. challenge for beginners, featuring a stack overflow with no mitigations. (TRUN)</div>
-    </li>
 
   </ul>
 </section>
@@ -302,6 +302,13 @@ html, body, .page, .page * {
     <button class="filter-btn" onclick="filterPosts('stack',this)">stack</button>
   </div>
   <ul class="post-list" id="post-list">
+    <li class="post-item" data-cat="kernel">
+      <div class="post-meta">2026 · kernel</div>
+      <div class="post-body">
+        <a class="post-link" href="https://github.com/00xAuto/FortiShield.sys-Full-Documentation-CVE-2015-5736">FortiShield.sys CVE-2015-5736 : Calling user input</a>
+        <div class="post-summary">I will be using PreviousMode in this one. A driver that had a really interesting vuln, It takes user input and then calls it. But it does require some understanding which i attempted to cover this one.</div>
+      </div>
+    </li>
     <li class="post-item" data-cat="kernel">
       <div class="post-meta">2026 · kernel</div>
       <div class="post-body">
